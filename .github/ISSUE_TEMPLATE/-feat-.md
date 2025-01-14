@@ -1,6 +1,6 @@
 ---
-name: 'fix: '
-about: 기능 수정
+name: "[feat]"
+about: 기능 구현
 title: ''
 labels: ''
 assignees: ''
