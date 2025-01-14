@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
-import static jakarta.persistence.GenerationType.*;
+import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
 @Entity
@@ -31,7 +31,7 @@ public class User {
     private String phoneNumber;
 
     @Column(nullable = false)
-    private LocalDateTime birthDate;
+    private LocalDate birthDate;
 
     @Column(name = "account_id", nullable = false)
     private String accountId; // 계좌 ID
@@ -47,7 +47,7 @@ public class User {
     @Column(nullable = false)
     private ActiveStatus status;
 
-    private User(String username, String password, String name, String phoneNumber, LocalDateTime birthDate,
+    private User(String username, String password, String name, String phoneNumber, LocalDate birthDate,
                  String accountId, String accountPassword, Role role, ActiveStatus status) {
         this.username = username;
         this.password = password;
@@ -60,7 +60,7 @@ public class User {
         this.status = status;
     }
 
-    public static User of(String username, String password, String name, String phoneNumber, LocalDateTime birthDate,
+    public static User of(String username, String password, String name, String phoneNumber, LocalDate birthDate,
                           String accountId, String accountPassword, Role role, ActiveStatus status) {
         return new User(username, password, name, phoneNumber, birthDate, accountId, accountPassword, role, status);
     }

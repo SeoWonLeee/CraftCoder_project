@@ -1,5 +1,6 @@
 package crafter_coder.domain.course.model;
 
+import crafter_coder.domain.course.model.category.CourseCategory;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

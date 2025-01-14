@@ -15,15 +15,20 @@ public class CourseSchedule {
 
     @Column(nullable = false)
     private String dayOfWeek;
-    @Column(nullable = false)
-    private LocalTime time;
 
-    private CourseSchedule(String dayOfWeek, LocalTime time) {
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
+
+    private CourseSchedule(String dayOfWeek, LocalTime startTime, LocalTime endTime) {
         this.dayOfWeek = dayOfWeek;
-        this.time = time;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
-    public static CourseSchedule of(String dayOfWeek, LocalTime time) {
-        return new CourseSchedule(dayOfWeek, time);
+    public static CourseSchedule of(String dayOfWeek, LocalTime startTime, LocalTime endTime) {
+        return new CourseSchedule(dayOfWeek, startTime, endTime);
     }
 }
