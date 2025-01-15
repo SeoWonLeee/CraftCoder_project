@@ -2,13 +2,12 @@ package crafter_coder.domain.course.service;
 
 import crafter_coder.domain.course.dto.CourseDetailResponse;
 import crafter_coder.domain.course.dto.CourseListResponse;
-import crafter_coder.domain.course.dto.CreateCourseRequest;
-import crafter_coder.domain.course.dto.UpdateCourseRequest;
+import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,22 +34,24 @@ public class CourseService {
                 .map(CourseDetailResponse::fromEntity);
     }
 
-//    // 강좌 개설
-//    public CourseDetailResponse createCourse(CreateCourseRequest request) {
-//        Course newCourse = request.toEntity();
-//        Course savedCourse = courseRepository.save(newCourse);
-//        return CourseDetailResponse.fromEntity(savedCourse);
-//    }
-//
-//    // 강좌 수정
-//    public CourseDetailResponse updateCourse(Long courseId, UpdateCourseRequest request) {
-//        Course existingCourse = courseRepository.findById(courseId)
-//                .orElseThrow(() -> new IllegalArgumentException("Course not found"));
-//
-//        request.updateEntity(existingCourse);
-//
-//        Course updatedCourse = courseRepository.save(existingCourse);
-//        return CourseDetailResponse.fromEntity(updatedCourse);
-//    }
+    // 강좌 생성
+    public Long createCourse(CourseRequest request, Long instructorId) {
+        Course course = request.toEntity(instructorId);
+        courseRepository.save(course);
+        return course.getId();
+    }
+
+    // 강좌 수정
+    public void updateCourse(Long courseId, CourseRequest request, Long instructorId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new EntityNotFoundException("해당 강좌를 찾을 수 없습니다."));
+        if (!course.getInstructorId().equals(instructorId)) {
+            throw new AccessDeniedException("해당 강좌를 수정할 권한이 없습니다.");
+        }
+        course.update(request);
+    }
 }
+
+
+
 
