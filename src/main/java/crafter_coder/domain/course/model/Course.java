@@ -68,7 +68,7 @@ public class Course {
         this.enrollmentDeadline = enrollmentDeadline;
     }
 
-    protected Course(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+    private Course(String name, CourseCategory courseCategory, CourseDuration courseDuration,
                      CourseSchedule courseSchedule, Long instructorId, CourseStatus status,
                      EnrollmentCapacity enrollmentCapacity, int price, String place, LocalDate enrollmentDeadline) {
         this.setFields(name, courseCategory, courseDuration, courseSchedule, enrollmentCapacity, price, place, enrollmentDeadline);
