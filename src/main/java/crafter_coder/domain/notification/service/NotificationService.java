@@ -3,6 +3,8 @@ package crafter_coder.domain.notification.service;
 import crafter_coder.domain.notification.NotificationDto;
 import crafter_coder.domain.notification.NotificationType;
 import crafter_coder.domain.notification.emitter.EmitterRepository;
+import crafter_coder.domain.notification.exception.NotificationException;
+import crafter_coder.domain.notification.exception.NotificationException.NotificationSendException;
 import crafter_coder.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -64,6 +66,7 @@ public class NotificationService {
                     .data(data));
         } catch (IOException e) {
             emitterRepository.deleteById(emitterId);
+            throw new NotificationSendException();
         }
     }
 
