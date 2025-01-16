@@ -49,6 +49,10 @@ public class NotificationService {
         );
     }
 
+    /*
+        {userId}_{timestamp} 형태의 Id 생성
+        lastEventId와 캐시에 저장해둔 이벤트들의 id를 timestamp 기준으로 비교하여 클라이언트가 받지 못한 이벤트들을 재전송할 수 있음
+    */
     private String makeTimeIncludeId(Long id) {
         return id + "_" + System.currentTimeMillis();
     }
