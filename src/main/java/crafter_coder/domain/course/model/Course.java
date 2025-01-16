@@ -1,7 +1,9 @@
 package crafter_coder.domain.course.model;
 
+import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.category.CourseCategory;
 import jakarta.persistence.*;
+import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -51,4 +53,57 @@ public class Course {
 
     @Column(nullable = false)
     private LocalDate enrollmentDeadline; // 수강신청 데드라인
+
+    // 공통 필드 설정
+    private void setFields(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+                           CourseSchedule courseSchedule, EnrollmentCapacity enrollmentCapacity,
+                           int price, String place, LocalDate enrollmentDeadline) {
+        this.name = name;
+        this.courseCategory = courseCategory;
+        this.courseDuration = courseDuration;
+        this.courseSchedule = courseSchedule;
+        this.enrollmentCapacity = enrollmentCapacity;
+        this.price = price;
+        this.place = place;
+        this.enrollmentDeadline = enrollmentDeadline;
+    }
+
+    private Course(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+                     CourseSchedule courseSchedule, Long instructorId, CourseStatus status,
+                     EnrollmentCapacity enrollmentCapacity, int price, String place, LocalDate enrollmentDeadline) {
+        this.setFields(name, courseCategory, courseDuration, courseSchedule, enrollmentCapacity, price, place, enrollmentDeadline);
+        this.instructorId = instructorId;
+        this.status = status;
+    }
+
+    public static Course create(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+                                CourseSchedule courseSchedule, Long instructorId, int maxCapacity, int price,
+                                String place, LocalDate enrollmentDeadline) {
+        return new Course(
+                name,
+                courseCategory,
+                courseDuration,
+                courseSchedule,
+                instructorId,
+                CourseStatus.OPEN, // 초기 상태는 OPEN
+                EnrollmentCapacity.of(maxCapacity, 0), // 초기 등록 인원은 0
+                price,
+                place,
+                enrollmentDeadline
+        );
+    }
+
+    // 수정 메서드
+    public void update(CourseRequest request) {
+        this.setFields(
+                request.getName(),
+                CourseCategory.valueOf(request.getCourseCategory()),
+                CourseDuration.of(LocalDate.parse(request.getStartDate()), LocalDate.parse(request.getEndDate())),
+                CourseSchedule.of(request.getDayOfWeek(), LocalTime.parse(request.getStartTime()), LocalTime.parse(request.getEndTime())),
+                EnrollmentCapacity.of(request.getMaxCapacity(), this.enrollmentCapacity.getCurrentEnrollment()),
+                request.getPrice(),
+                request.getPlace(),
+                LocalDate.parse(request.getEnrollmentDeadline())
+        );
+    }
 }
