@@ -36,7 +36,7 @@ public class User {
     @Column(nullable = false)
     private LocalDate birthDate;
 
-    @Column(name = "account_id", nullable = false)
+    @Column(name = "account_id", nullable = true)
     private String accountId; // 계좌 ID
 
     @Column(name = "account_password", nullable = false)
