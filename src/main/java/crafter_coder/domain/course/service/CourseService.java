@@ -7,7 +7,7 @@ import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.AccessDeniedException;
+//import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -46,7 +46,7 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 강좌를 찾을 수 없습니다."));
         if (!course.getInstructorId().equals(instructorId)) {
-            throw new AccessDeniedException("해당 강좌를 수정할 권한이 없습니다.");
+         //   throw new AccessDeniedException("해당 강좌를 수정할 권한이 없습니다.");
         }
         course.update(request);
     }

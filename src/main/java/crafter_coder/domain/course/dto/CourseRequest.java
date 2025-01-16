@@ -3,14 +3,14 @@ package crafter_coder.domain.course.dto;
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.model.CourseDuration;
 import crafter_coder.domain.course.model.CourseSchedule;
-import crafter_coder.domain.course.model.category.CourseCategory;
+import crafter_coder.domain.course.model.category.CourseSubCategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import lombok.NoArgsConstructor;
 
 @Getter
 @Builder
@@ -33,7 +33,7 @@ public class CourseRequest {
     public Course toEntity(Long instructorId) {
         return Course.create(
                 name,
-                CourseCategory.valueOf(courseCategory),
+                CourseSubCategory.valueOf(courseCategory),
                 CourseDuration.of(LocalDate.parse(startDate), LocalDate.parse(endDate)),
                 CourseSchedule.of(dayOfWeek, LocalTime.parse(startTime), LocalTime.parse(endTime)),
                 instructorId,
