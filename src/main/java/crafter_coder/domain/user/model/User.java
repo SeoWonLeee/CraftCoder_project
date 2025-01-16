@@ -16,7 +16,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = IDENTITY) // IDENTITY: Auto-increment 사용
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, unique = true, updatable = false) //user 지정 아이디
     private String username;
