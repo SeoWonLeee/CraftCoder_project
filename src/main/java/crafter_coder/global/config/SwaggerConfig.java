@@ -14,8 +14,8 @@ import java.util.List;
 @Configuration
 public class SwaggerConfig {
 
-//    @Value("${dev-host}")
-//    private String serverHost;
+    //@Value("${dev-host}")
+    //private String serverHost;
 
     @Bean
     public OpenAPI openAPI(){

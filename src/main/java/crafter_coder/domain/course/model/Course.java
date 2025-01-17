@@ -2,6 +2,7 @@ package crafter_coder.domain.course.model;
 
 import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.category.CourseCategory;
+import crafter_coder.domain.course.model.category.CourseSubCategory;
 import jakarta.persistence.*;
 import java.time.LocalTime;
 import lombok.Getter;
@@ -27,7 +28,7 @@ public class Course {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private CourseCategory courseCategory;
+    private CourseSubCategory courseCategory;
 
     @Embedded
     private CourseDuration courseDuration;
@@ -55,7 +56,7 @@ public class Course {
     private LocalDate enrollmentDeadline; // 수강신청 데드라인
 
     // 공통 필드 설정
-    private void setFields(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+    private void setFields(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
                            CourseSchedule courseSchedule, EnrollmentCapacity enrollmentCapacity,
                            int price, String place, LocalDate enrollmentDeadline) {
         this.name = name;
@@ -68,7 +69,7 @@ public class Course {
         this.enrollmentDeadline = enrollmentDeadline;
     }
 
-    private Course(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+    private Course(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
                      CourseSchedule courseSchedule, Long instructorId, CourseStatus status,
                      EnrollmentCapacity enrollmentCapacity, int price, String place, LocalDate enrollmentDeadline) {
         this.setFields(name, courseCategory, courseDuration, courseSchedule, enrollmentCapacity, price, place, enrollmentDeadline);
@@ -76,7 +77,7 @@ public class Course {
         this.status = status;
     }
 
-    public static Course create(String name, CourseCategory courseCategory, CourseDuration courseDuration,
+    public static Course create(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
                                 CourseSchedule courseSchedule, Long instructorId, int maxCapacity, int price,
                                 String place, LocalDate enrollmentDeadline) {
         return new Course(
@@ -97,7 +98,7 @@ public class Course {
     public void update(CourseRequest request) {
         this.setFields(
                 request.getName(),
-                CourseCategory.valueOf(request.getCourseCategory()),
+                CourseSubCategory.valueOf(request.getCourseCategory()),
                 CourseDuration.of(LocalDate.parse(request.getStartDate()), LocalDate.parse(request.getEndDate())),
                 CourseSchedule.of(request.getDayOfWeek(), LocalTime.parse(request.getStartTime()), LocalTime.parse(request.getEndTime())),
                 EnrollmentCapacity.of(request.getMaxCapacity(), this.enrollmentCapacity.getCurrentEnrollment()),
