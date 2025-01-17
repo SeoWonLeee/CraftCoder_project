@@ -1,4 +1,4 @@
-package crafter_coder.domain.uesr_course.model;
+package crafter_coder.domain.user_course.model;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;

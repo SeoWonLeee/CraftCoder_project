@@ -1,5 +1,6 @@
 package crafter_coder.domain.user.dto;
 
+
 import crafter_coder.domain.user.model.ActiveStatus;
 import crafter_coder.domain.user.model.Role;
 import crafter_coder.domain.user.model.User;
@@ -25,6 +26,7 @@ public class UserResponseDto {
     private String accountPassword;
     private Role role;
     private ActiveStatus status;
+
 
     public static UserResponseDto of(User user) {
         return UserResponseDto.builder()
