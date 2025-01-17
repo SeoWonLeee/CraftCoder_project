@@ -50,22 +50,22 @@ tasks.named('test') {
 	useJUnitPlatform()
 }
 
-def querydslDir = 'src/main/generated'
-
-sourceSets {
-	main {
-		java {
-			srcDirs += querydslDir
-		}
-	}
-}
-tasks.withType(JavaCompile) {
-	options.generatedSourceOutputDirectory = file(querydslDir)
-	options.compilerArgs += '-parameters'
-}
-
-tasks.named('clean') {
-	doLast {
-		file(querydslDir).deleteDir()
-	}
-}
+//def querydslDir = 'src/main/generated'
+//
+//sourceSets {
+//	main {
+//		java {
+//			srcDirs += querydslDir
+//		}
+//	}
+//}
+//tasks.withType(JavaCompile) {
+//	options.generatedSourceOutputDirectory = file(querydslDir)
+//	options.compilerArgs += '-parameters'
+//}
+//
+//tasks.named('clean') {
+//	doLast {
+//		file(querydslDir).deleteDir()
+//	}
+//}
