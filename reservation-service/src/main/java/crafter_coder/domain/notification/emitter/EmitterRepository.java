@@ -22,9 +22,8 @@ public class EmitterRepository {
      */
     private final Map<String, Object> eventCache = new ConcurrentHashMap<>();
 
-    public SseEmitter save(String emitterId, SseEmitter emitter) {
+    public void save(String emitterId, SseEmitter emitter) {
         emitters.put(emitterId, emitter);
-        return emitter;
     }
 
     public void saveEventCache(String eventCacheId, Object event) {
