@@ -19,7 +19,7 @@ public class NotificationEventListener {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true) // 트랜잭션 커밋 시에만 실행, 혹은 트랜잭션이 아예 없어도 실행
     public void handleNotificationEvent(NotificationEvent event) {
         NotificationDto notificationDto = event.getNotificationDto();
-        String eventId = IdGenerator.makeTimeIncludeId(notificationDto.receiverId());
+        String eventId = notificationService.makeTimeIncludeId(notificationDto.receiverId());
         notificationService.send(eventId, notificationDto.notificationType(), notificationDto.content());
     }
 }

@@ -19,7 +19,7 @@ public class NotificationController {
             @RequestParam Long userId,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId
     ) {
-        String emitterId = IdGenerator.makeTimeIncludeId(userId);
+        String emitterId = notificationService.makeTimeIncludeId(userId);
         return ResponseEntity.ok(notificationService.subscribe(emitterId, lastEventId));
     }
 }
