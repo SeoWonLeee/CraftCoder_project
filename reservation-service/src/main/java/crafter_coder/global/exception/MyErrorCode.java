@@ -22,8 +22,13 @@ public enum MyErrorCode {
     INVALID_REQUEST_DATA(HttpStatus.BAD_REQUEST, "요청 데이터가 잘못되었습니다."),
     CANNOT_UPDATE_COURSE(HttpStatus.BAD_REQUEST, "강좌 상태를 변경할 수 없습니다."),
     CANNOT_DELETE_COURSE(HttpStatus.BAD_REQUEST, "강좌 삭제 요청을 처리할 수 없습니다."),
-    REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID로 조회된 강사 요청을 찾을 수 없습니다.");
+    REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID로 조회된 강사 요청을 찾을 수 없습니다."),
 
+    // Queue
+    QUEUE_SYSTEM_BUSY(HttpStatus.SERVICE_UNAVAILABLE, "시스템이 바쁩니다. 잠시 후 다시 시도해주세요."),
+    QUEUE_FULL(HttpStatus.SERVICE_UNAVAILABLE, "해당 강좌의 대기열이 가득 찼습니다. 나중에 다시 시도해주세요."),
+    LOCK_ACQUISITION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "잠금 획득에 실패했습니다. 잠시 후 다시 시도해주세요."),
+    ;
 
     private final HttpStatus status;
     private final String message;

@@ -26,7 +26,7 @@ public class CourseService {
     //강좌 신청하기
     public AddQueueResponse applyCourse(Long courseId, String userId) {
 
-        return redisQueueFacade.addToWaitingQueue(courseId, userId);
+        return redisQueueFacade.addApplyToWaitingQueue(courseId, userId);
     }
 
     //전체 강좌 목록 가져오기
