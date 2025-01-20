@@ -19,44 +19,30 @@ public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final Long timeoutMillis = 600_000L;
 
-    public SseEmitter subscribe(Long userId, String lastEventId) {
-        String emitterId = makeTimeIncludeId(userId);
-        SseEmitter emitter = emitterRepository.save(emitterId, new SseEmitter(timeoutMillis));
-        emitter.onCompletion(() -> emitterRepository.deleteById(emitterId)); // SSE 연결 종료 시
-        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId)); // SSE 연결 시간 초과 시
-        // 이벤트 전송 실패 시 emitter 제거, 클라이언트에서 자동으로 재연결 시도
-        emitter.onError(e -> emitterRepository.deleteById(emitterId));
+    public SseEmitter subscribe(String emitterId, String lastEventId) {
+        // makeTimeIncludeId가 현재 시간에 의존하기 때문에 순수 함수가 될수 없고 테스트하기 어렵게 만듦, 시간 관련 id를 인자로 주입받도록 변경
+        SseEmitter emitter = new SseEmitter(timeoutMillis);
+        registerEmitterCallbacks(emitterId, emitter);
 
-        String eventId = makeTimeIncludeId(userId);
-        sendNotification(emitter, eventId,
-                emitterId, "이벤트 stream 생성. [userId=%d]".formatted(userId));
+        emitterRepository.save(emitterId, emitter);
 
-        if (hasLostData(lastEventId)) {
-            sendLostData(lastEventId, userId, emitterId, emitter);
-        }
+        Long userId = extractUserId(emitterId);
+        handleInitialNotification(emitterId, lastEventId, emitter, userId);
 
         return emitter;
     }
 
-    public void send(Long userId, NotificationType notificationType, String content) {
-        String eventId = makeTimeIncludeId(userId);
+    public void send(String eventId, NotificationType notificationType, String content) {
+        Long userId = extractUserId(eventId);
         NotificationDto notification = NotificationDto.of(content, notificationType, userId);
         Map<String, SseEmitter> emitters = emitterRepository.findAllEmittersByUserId(userId.toString());
         emitters.forEach(
                 (id, emitter) -> {
-                    emitterRepository.saveEventCache(id, notification);
+                    emitterRepository.saveEventCache(eventId, notification);
                     sendNotification(emitter, eventId, id,
                             notification);
                 }
         );
-    }
-
-    /*
-        {userId}_{timestamp} 형태의 Id 생성
-        lastEventId와 캐시에 저장해둔 이벤트들의 id를 timestamp 기준으로 비교하여 클라이언트가 받지 못한 이벤트들을 재전송할 수 있음
-    */
-    private String makeTimeIncludeId(Long id) {
-        return id + "_" + System.currentTimeMillis();
     }
 
     private void sendNotification(SseEmitter emitter, String eventId, String emitterId, Object data) {
@@ -80,5 +66,35 @@ public class NotificationService {
         eventCaches.entrySet().stream()
                 .filter(entry -> lastEventId.compareTo(entry.getKey()) < 0)
                 .forEach(entry -> sendNotification(emitter, entry.getKey(), emitterId, entry.getValue()));
+    }
+
+    private void registerEmitterCallbacks(String emitterId, SseEmitter emitter) {
+        emitter.onCompletion(() -> emitterRepository.deleteById(emitterId)); // SSE 연결 종료 시
+        emitter.onTimeout(() -> emitterRepository.deleteById(emitterId)); // SSE 연결 시간 초과 시
+        // 이벤트 전송 실패 시 emitter 제거, 클라이언트에서 자동으로 재연결 시도
+        emitter.onError(e -> emitterRepository.deleteById(emitterId));
+    }
+
+    private void handleInitialNotification(String emitterId, String lastEventId, SseEmitter emitter, Long userId) {
+        sendNotification(emitter, emitterId,
+                emitterId, "이벤트 stream 생성. [userId=%d]".formatted(userId));
+
+        if (hasLostData(lastEventId)) {
+            sendLostData(lastEventId, userId, emitterId, emitter);
+        }
+    }
+
+    public String makeTimeIncludeId(Long id) {
+        return id + "_" + System.currentTimeMillis();
+    }
+
+    private Long extractUserId(String combinedId) {
+        int underscoreIndex = combinedId.indexOf('_');
+        if (underscoreIndex != -1) {
+            return Long.valueOf(combinedId.substring(0, underscoreIndex));
+        } else {
+            // 언더스코어가 없을 경우 전체 문자열 반환 또는 예외 처리
+            return Long.valueOf(combinedId);
+        }
     }
 }

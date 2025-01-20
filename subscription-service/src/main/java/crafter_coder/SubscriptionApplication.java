@@ -4,10 +4,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class CrafterCoderApplication {
+public class SubscriptionApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(CrafterCoderApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(SubscriptionApplication.class, args);
+    }
 }

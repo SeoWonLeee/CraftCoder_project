@@ -1,5 +1,6 @@
 package crafter_coder.domain.notification.controller;
 
+import crafter_coder.domain.notification.emitter.util.IdGenerator;
 import crafter_coder.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -18,6 +19,7 @@ public class NotificationController {
             @RequestParam Long userId,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId
     ) {
-        return ResponseEntity.ok(notificationService.subscribe(userId, lastEventId));
+        String emitterId = notificationService.makeTimeIncludeId(userId);
+        return ResponseEntity.ok(notificationService.subscribe(emitterId, lastEventId));
     }
 }
