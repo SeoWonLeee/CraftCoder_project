@@ -25,7 +25,7 @@ public class InstructorRequestDto {
     private LocalDate requestedAt;
 
     public static InstructorRequestDto of(InstructorRequest request) {
-        return InstructorRequestDto.builder()
+        return builder()
                 .requestId(request.getId())
                 .type(request.getType().name())
                 .courseId(request.getCourse().getId())

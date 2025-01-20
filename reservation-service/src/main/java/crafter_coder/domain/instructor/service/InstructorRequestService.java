@@ -2,8 +2,8 @@ package crafter_coder.domain.instructor.service;
 
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
-import crafter_coder.domain.instructor.model.InstructorRequest;
 import crafter_coder.domain.instructor.repository.InstructorRequestRepository;
+import crafter_coder.domain.instructor.model.InstructorRequest;
 import crafter_coder.domain.user.model.Role;
 import crafter_coder.domain.user.model.User;
 import crafter_coder.domain.user.repository.UserRepository;
