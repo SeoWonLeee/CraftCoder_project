@@ -1,10 +1,13 @@
 package crafter_coder.domain.subscription.model;
 
 import crafter_coder.domain.program.model.Program;
+import crafter_coder.domain.program.model.ProgramStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import static jakarta.persistence.FetchType.LAZY;
 
@@ -17,8 +20,7 @@ public class Subscription {
     private Long id;
 
     @ManyToOne(fetch = LAZY, optional = false)
-    @JoinColumn(name = "program_id")
-    @NotNull
+    @JoinColumn(name = "program_id", nullable = false)
     private Program program;
 
     @NotNull
@@ -26,6 +28,10 @@ public class Subscription {
 
     @NotNull
     private String accountPassword;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private SubscriptionStatus status;
 
     private Subscription(Program program, String accountNumber, String accountPassword) {
         this.program = program;
@@ -35,5 +41,13 @@ public class Subscription {
 
     public static Subscription of(Program program, String accountNumber, String accountPassword) {
         return new Subscription(program, accountNumber, accountPassword);
+    }
+
+    public void softDelete() {
+        this.status = SubscriptionStatus.DELETED;
+    }
+
+    public void updateStatus(SubscriptionStatus status) {
+        this.status = status;
     }
 }

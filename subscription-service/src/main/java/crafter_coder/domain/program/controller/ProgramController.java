@@ -2,20 +2,33 @@ package crafter_coder.domain.program.controller;
 
 import crafter_coder.domain.program.dto.ProgramReqDto;
 import crafter_coder.domain.program.dto.ProgramResDto;
+import crafter_coder.domain.program.service.ProgramService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/subscriptions/programs")
+@RequestMapping("/api/v1/programs")
 public class ProgramController {
+
+    private final ProgramService programService;
 
     @PostMapping("/register")
     public ResponseEntity<ProgramResDto> register(@RequestBody ProgramReqDto programReqDto) {
-        return ResponseEntity.ok();
+        ProgramResDto programResDto = programService.register(programReqDto);
+        return ResponseEntity.ok(programResDto);
+    }
+
+    // 원래는 헤더로 액세스 토큰을 받아서 권한이 있는 경우에만 삭제할 수 있도록 해야함
+    // TODO: 이 서비스에서 프로그램 비밀번호를 엔티티에 저장하고 인증 시 액세스 토큰을 발급해주도록
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ProgramResDto> delete(@PathVariable Long id) {
+        return ResponseEntity.ok(programService.delete(id));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProgramResDto> getProgram(@PathVariable Long id) {
+        return ResponseEntity.ok(programService.getProgram(id));
     }
 }

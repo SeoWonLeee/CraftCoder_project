@@ -1,12 +1,11 @@
 package crafter_coder.openFeign.error;
 
-import crafter_coder.global.exception.RestApiException;
-import crafter_coder.global.exception.RestApiException.RestApiClientException;
-import crafter_coder.global.exception.RestApiException.RestApiServerException;
+import crafter_coder.openFeign.exception.RestApiException.RestApiClientException;
+import crafter_coder.openFeign.exception.RestApiException.RestApiServerException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StreamUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,12 +13,14 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
 
+@Slf4j
 public class FeignErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         String responseBody = parseResponseBody(response);
         String requestUrl = response.request().url();
         HttpStatus responseStatus = HttpStatus.valueOf(response.status());
+        log.error("FeignException 발생 : url={}, status={}, responseBody={}", requestUrl, responseStatus, responseBody);
 
         if(responseStatus.is5xxServerError()) {
             return new RestApiServerException(responseStatus, requestUrl, responseBody);

@@ -3,6 +3,7 @@ package crafter_coder.domain.program.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -27,14 +28,34 @@ public class Program {
     @NotNull
     private String accountNumber;
 
-    private Program(String name, int price, int billingDate, String accountNumber) {
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    private ProgramStatus status;
+
+    @Builder
+    private Program(String name, int price, int billingDate, String accountNumber, ProgramStatus status) {
         this.name = name;
         this.price = price;
         this.billingDate = billingDate;
         this.accountNumber = accountNumber;
+        this.status = status;
     }
 
-    public static Program of(String name, int price, int billingDate, String accountNumber) {
-        return new Program(name, price, billingDate, accountNumber);
+    public static Program of(String name, int price, int billingDate, String accountNumber, ProgramStatus status) {
+        return Program.builder()
+                .name(name)
+                .price(price)
+                .billingDate(billingDate)
+                .accountNumber(accountNumber)
+                .status(status)
+                .build();
+    }
+
+    public void softDelete() {
+        this.status = ProgramStatus.DELETED;
+    }
+
+    public void updateStatus(ProgramStatus status) {
+        this.status = status;
     }
 }

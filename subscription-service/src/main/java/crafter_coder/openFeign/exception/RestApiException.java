@@ -1,4 +1,4 @@
-package crafter_coder.global.exception;
+package crafter_coder.openFeign.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

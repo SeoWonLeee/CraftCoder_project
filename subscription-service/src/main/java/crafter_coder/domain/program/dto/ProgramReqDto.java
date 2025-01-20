@@ -1,5 +1,7 @@
 package crafter_coder.domain.program.dto;
 
+import crafter_coder.domain.program.model.Program;
+import crafter_coder.domain.program.model.ProgramStatus;
 import jakarta.validation.constraints.*;
 
 public record ProgramReqDto(
@@ -14,10 +16,13 @@ public record ProgramReqDto(
         @Max(value = 28, message = "결제일은 28일까지 가능합니다.")
         int billingDate,
 
-        long accountNumber
+        String accountNumber
 ) {
-    public static ProgramReqDto of(String name, int price, int billingDate, long accountNumber) {
-
+    public static ProgramReqDto of(String name, int price, int billingDate, String accountNumber) {
         return new ProgramReqDto(name, price, billingDate, accountNumber);
+    }
+
+    public static Program toEntity(ProgramReqDto programReqDto) {
+        return Program.of(programReqDto.name(), programReqDto.price(), programReqDto.billingDate(), programReqDto.accountNumber(), ProgramStatus.ACTIVE);
     }
 }
