@@ -1,1 +1,3 @@
 rootProject.name = 'crafter-coder'
+
+include 'reservation-service', 'subscription-service'
