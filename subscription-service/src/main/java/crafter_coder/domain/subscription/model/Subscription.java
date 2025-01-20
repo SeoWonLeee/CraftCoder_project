@@ -22,7 +22,7 @@ public class Subscription {
     private Program program;
 
     @NotNull
-    private long accountNumber;
+    private String accountNumber;
 
     @NotNull
     private String accountPassword;

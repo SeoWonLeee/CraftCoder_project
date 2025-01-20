@@ -22,9 +22,9 @@ public class Program {
 
     // 결제일(ex. 1~31일 중 하나)
     @NotNull
-    private int billingDay;
+    private int billingDate;
 
     @NotNull
-    private long accountNumber;
+    private String accountNumber;
 
 }
