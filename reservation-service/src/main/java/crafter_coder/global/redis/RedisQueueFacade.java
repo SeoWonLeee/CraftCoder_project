@@ -33,23 +33,23 @@ public class RedisQueueFacade {
      */
     public AddQueueResponse addToWaitingQueue(Long courseId, String userId) {
         String waitingQueueKey = WAITING_QUEUE_KEY + courseId; // 대기큐에 들어갈 (강좌 + 사용자) 키
+        Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey); // 대기 큐 크기 확인
+
+        if (queueSize != null && queueSize >= MAX_WAITING_QUEUE_SIZE) {
+            throw new MyException(MyErrorCode.QUEUE_FULL);
+        }
 
         RLock lock = redissonClient.getLock("lock:course:" + courseId);
         try {
+            // 락 확인
             boolean isLockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
             if (!isLockAcquired) {
                 throw new MyException(MyErrorCode.QUEUE_SYSTEM_BUSY);
             }
-
-            // 대기 큐 크기 확인
-            Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey);
-            if (queueSize != null && queueSize >= MAX_WAITING_QUEUE_SIZE) {
-                throw new MyException(MyErrorCode.QUEUE_FULL);
-            }
-
             // 대기 큐에 추가
             long timestamp = System.currentTimeMillis();
             redisTemplate.opsForZSet().add(waitingQueueKey, userId, timestamp);
+            log.info("대기열에 추가 - {}, {} ({}초)", waitingQueueKey,userId, timestamp);
 
             return AddQueueResponse.of("Added to the waiting queue.");
         } catch (InterruptedException e) {
@@ -72,7 +72,7 @@ public class RedisQueueFacade {
 
         redisTemplate.opsForHash().put(activeQueueKey, userId, String.valueOf(timestamp));
         redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId));
-
+        log.info("{} 활성큐에 추가 - '{}'님이 입장함. ({}초)", activeQueueKey, userId, timestamp);
     }
 
     /**
@@ -99,6 +99,8 @@ public class RedisQueueFacade {
      */
     @Scheduled(fixedRate = 1000) // 1초마다 실행
     public void manageAllQueues() {
+
+        log.info("스케줄러 동기화 확인 : {}초", System.currentTimeMillis());
         Set<String> courseIds = redisTemplate.opsForSet().members(COURSE_IDS_SET);
         if (courseIds != null && !courseIds.isEmpty()) {
             for (String courseId : courseIds) {
@@ -129,7 +131,7 @@ public class RedisQueueFacade {
 
             if (elapsedTime > ACTIVE_QUEUE_TTL * 1000) {
                 redisTemplate.opsForHash().delete(activeQueueKey, key); // 활성 큐에서 제거
-                log.info("User = {}, removed due to timeout. 알림 발송", key); //시간 초과로 인해 신청 실패 알림 전송 로직(미구현)
+                log.info("activeKey = {}, User = {}, removed due to timeout. 알림 발송",activeQueueKey, key); //시간 초과로 인해 신청 실패 알림 전송 로직(미구현)
             }
         }
 
@@ -143,10 +145,13 @@ public class RedisQueueFacade {
                     addToActiveQueue(courseId, userId); // 활성 큐에 추가 (진입 시간 기록)
                     // 대기 큐에서 제거
                     redisTemplate.opsForZSet().remove(waitingQueueKey, userId);
+                    log.info("waitingKey = {}, User = {}, removed due to timeout.", waitingQueueKey, userId);
 
                 }
             }
         }
+
+
     }
 
 

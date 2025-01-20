@@ -5,6 +5,8 @@ import crafter_coder.domain.course.dto.CourseListResponse;
 import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.global.redis.AddQueueResponse;
+import crafter_coder.global.redis.RedisQueueFacade;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.access.AccessDeniedException;
@@ -19,8 +21,13 @@ import java.util.stream.Collectors;
 public class CourseService {
 
     private final CourseRepository courseRepository;
+    private final RedisQueueFacade redisQueueFacade;
 
+    //강좌 신청하기
+    public AddQueueResponse applyCourse(Long courseId, String userId) {
 
+        return redisQueueFacade.addToWaitingQueue(courseId, userId);
+    }
 
     //전체 강좌 목록 가져오기
     public List<CourseListResponse> getAllCourses() {
