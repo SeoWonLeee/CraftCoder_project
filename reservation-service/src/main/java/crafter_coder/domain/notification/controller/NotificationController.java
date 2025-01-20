@@ -1,6 +1,5 @@
 package crafter_coder.domain.notification.controller;
 
-import crafter_coder.domain.notification.emitter.util.IdGenerator;
 import crafter_coder.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
