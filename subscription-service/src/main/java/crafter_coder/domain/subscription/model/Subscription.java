@@ -25,5 +25,5 @@ public class Subscription {
     private long accountNumber;
 
     @NotNull
-    private long accountPassword;
+    private String accountPassword;
 }
