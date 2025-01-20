@@ -15,7 +15,7 @@ import static lombok.AccessLevel.PROTECTED;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = IDENTITY) // IDENTITY: Auto-increment 사용
+    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(nullable = false, unique = true, updatable = false)
@@ -34,10 +34,10 @@ public class User {
     private LocalDate birthDate;
 
     @Column(name = "account_id", nullable = false)
-    private String accountId; // 계좌 ID
+    private String accountId;
 
     @Column(name = "account_password", nullable = false)
-    private String accountPassword; // 계좌 비밀번호
+    private String accountPassword;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -47,8 +47,16 @@ public class User {
     @Column(nullable = false)
     private ActiveStatus status;
 
+    @Column(nullable = true)
+    private String specialization;
+
+    public static User of(String username, String password, String name, String phoneNumber, LocalDate birthDate,
+                          String accountId, String accountPassword, Role role, ActiveStatus status, String specialization) {
+        return new User(username, password, name, phoneNumber, birthDate, accountId, accountPassword, role, status, specialization);
+    }
+
     private User(String username, String password, String name, String phoneNumber, LocalDate birthDate,
-                 String accountId, String accountPassword, Role role, ActiveStatus status) {
+                 String accountId, String accountPassword, Role role, ActiveStatus status, String specialization) {
         this.username = username;
         this.password = password;
         this.name = name;
@@ -58,11 +66,11 @@ public class User {
         this.accountPassword = accountPassword;
         this.role = role;
         this.status = status;
+        this.specialization = specialization;
     }
 
-    public static User of(String username, String password, String name, String phoneNumber, LocalDate birthDate,
-                          String accountId, String accountPassword, Role role, ActiveStatus status) {
-        return new User(username, password, name, phoneNumber, birthDate, accountId, accountPassword, role, status);
+    public void updateStatus(ActiveStatus newStatus) {
+        this.status = newStatus;
     }
 
 }
