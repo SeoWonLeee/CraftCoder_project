@@ -26,4 +26,14 @@ public class Subscription {
 
     @NotNull
     private String accountPassword;
+
+    private Subscription(Program program, String accountNumber, String accountPassword) {
+        this.program = program;
+        this.accountNumber = accountNumber;
+        this.accountPassword = accountPassword;
+    }
+
+    public static Subscription of(Program program, String accountNumber, String accountPassword) {
+        return new Subscription(program, accountNumber, accountPassword);
+    }
 }

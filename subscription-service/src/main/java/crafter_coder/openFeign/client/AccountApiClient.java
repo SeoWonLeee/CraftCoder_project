@@ -1,4 +1,4 @@
-package crafter_coder.client;
+package crafter_coder.openFeign.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

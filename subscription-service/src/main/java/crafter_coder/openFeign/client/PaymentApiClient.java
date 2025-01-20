@@ -1,4 +1,4 @@
-package crafter_coder.client;
+package crafter_coder.openFeign.client;
 
 import crafter_coder.domain.payment.dto.PaymentResDto;
 import org.springframework.cloud.openfeign.FeignClient;

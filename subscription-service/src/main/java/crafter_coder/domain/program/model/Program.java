@@ -27,4 +27,14 @@ public class Program {
     @NotNull
     private String accountNumber;
 
+    private Program(String name, int price, int billingDate, String accountNumber) {
+        this.name = name;
+        this.price = price;
+        this.billingDate = billingDate;
+        this.accountNumber = accountNumber;
+    }
+
+    public static Program of(String name, int price, int billingDate, String accountNumber) {
+        return new Program(name, price, billingDate, accountNumber);
+    }
 }
