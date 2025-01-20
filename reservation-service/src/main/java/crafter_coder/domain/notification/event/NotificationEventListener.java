@@ -1,7 +1,6 @@
 package crafter_coder.domain.notification.event;
 
 import crafter_coder.domain.notification.NotificationDto;
-import crafter_coder.domain.notification.emitter.util.IdGenerator;
 import crafter_coder.domain.notification.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
