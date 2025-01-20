@@ -1,4 +1,4 @@
-package crafter_coder.global.domain.redis;
+package crafter_coder.global.redis;
 
 import crafter_coder.global.exception.MyErrorCode;
 import crafter_coder.global.exception.MyException;
