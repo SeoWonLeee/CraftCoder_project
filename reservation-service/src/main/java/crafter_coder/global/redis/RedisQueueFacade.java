@@ -1,5 +1,9 @@
 package crafter_coder.global.redis;
 
+import crafter_coder.domain.course.model.Course;
+import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.domain.user_course.model.UserCourse;
+import crafter_coder.domain.user_course.repository.UserCourseRepository;
 import crafter_coder.global.exception.MyErrorCode;
 import crafter_coder.global.exception.MyException;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +25,8 @@ public class RedisQueueFacade {
 
     private final RedisTemplate<String, String> redisTemplate;
     private final RedissonClient redissonClient;
+    private final UserCourseRepository userCourseRepository;
+    private final CourseRepository courseRepository;
 
 
     private static final String WAITING_QUEUE_KEY = "queue:waiting:";
@@ -83,6 +89,19 @@ public class RedisQueueFacade {
 
     private void saveToDatabase(Long courseId, String userId) {
         // RDB 저장 로직 구현
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
+
+        // 2. 중복 확인: 이미 저장된 UserCourse가 있는지 확인
+        boolean exists = userCourseRepository.existsByCourse(course);
+        if (exists) {
+            log.info("UserCourse는 이미 존재합니다.(중복 신청) courseId: {}", userId, courseId);
+            return; // 중복된 경우 저장하지 않음
+        }
+
+        // 3. UserCourse 엔티티 생성
+        UserCourse userCourse = UserCourse.of(null, course);
+        userCourseRepository.save(userCourse);
         log.info("Saved courseId: " + "{}" + ", userId: " + "{}" + " to DB.", courseId, userId);
     }
 

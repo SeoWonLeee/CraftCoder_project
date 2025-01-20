@@ -35,4 +35,15 @@ public class UserCourse {
     @Column(name = "payment_deadline", nullable = false)
     private LocalDate paymentDeadline;
 
+    private UserCourse(User user, Course course, EnrollmentStatus enrollmentStatus, LocalDate paymentDeadline) {
+        this.user = user;
+        this.course = course;
+        this.enrollmentStatus = enrollmentStatus;
+        this.paymentDeadline = paymentDeadline;
+    }
+
+    public static UserCourse of(User user, Course course) {
+        LocalDate enrollmentDeadline = course.getEnrollmentDeadline();
+        return new UserCourse(user, course, EnrollmentStatus.APPLICATED, enrollmentDeadline);
+    }
 }
