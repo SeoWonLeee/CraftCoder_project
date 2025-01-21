@@ -214,6 +214,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.lang.NonNull;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -222,170 +223,169 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * RedisQueueFacade:
- * Redis를 사용하여 강좌 활성 큐 및 대기 큐를 관리하고,
- * 결제 완료/취소 및 TTL 초과 처리 로직을 제공하는 클래스입니다.
+ * Redis를 사용하여 강좌 신청 대기 큐와 활성 큐를 관리하고,
+ * 결제 완료/취소, TTL 초과 등의 로직을 처리하는 클래스.
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class RedisQueueFacade {
 
-    // RedisTemplate: Redis와 데이터를 주고받기 위한 객체
+    // Redis와 데이터를 주고받기 위한 객체
     private final RedisTemplate<String, String> redisTemplate;
-    private final RedissonClient redissonClient; // Redisson: 분산 락 처리를 위한 클라이언트
 
+    // 분산 락 처리를 위한 Redisson 클라이언트
+    private final RedissonClient redissonClient;
+
+    // 데이터베이스와 연결된 Repository들
     private final UserCourseRepository userCourseRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
 
+    // Redis 키와 관련된 상수 정의
     private static final String WAITING_QUEUE_KEY = "queue:waiting:"; // 대기 큐의 Redis 키 Prefix
     private static final String ACTIVE_QUEUE_KEY = "queue:active:";  // 활성 큐의 Redis 키 Prefix
     private static final String COURSE_IDS_SET = "course:ids";       // 모든 강좌 ID를 저장하는 Redis 키
-    private static final int ACTIVE_QUEUE_TTL = 86400; // 활성 큐 TTL (24시간)
+
+    // 활성 큐와 대기 큐의 크기 및 TTL 설정
+    private static final int ACTIVE_QUEUE_TTL = 86400; // 활성 큐 TTL (초) - 24시간
     private static final int MAX_ACTIVE_QUEUE_SIZE = 30; // 최대 활성 큐 크기
     private static final int MAX_WAITING_QUEUE_SIZE = 15; // 최대 대기 큐 크기
 
     /**
-     * 강좌 신청 로직: 대기 큐에 사용자를 추가합니다.
+     * 강좌 신청 로직: 대기 큐에 사용자 추가
      *
      * @param courseId 강좌 ID
      * @param userId   사용자 ID
      * @return AddQueueResponse 대기 큐 추가 응답 객체
      */
-    public AddQueueResponse addApplyToWaitingQueue(Long courseId, String userId) {
-        // 대기 큐 키 생성
+    public AddQueueResponse addApplyToWaitingQueue(@NonNull Long courseId, @NonNull String userId) {
+        // Redis에서 대기 큐 키 생성
         String waitingQueueKey = WAITING_QUEUE_KEY + courseId;
 
-        // 대기 큐 크기 확인
+        // 대기 큐의 현재 크기를 확인
         Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey);
-        log.info("courseId queueSize = {}", queueSize);
-
-        // 대기 큐가 꽉 찬 경우 예외 발생
         if (queueSize == null || queueSize >= MAX_WAITING_QUEUE_SIZE) {
-            throw new MyException(MyErrorCode.QUEUE_FULL);
+            throw new MyException(MyErrorCode.QUEUE_FULL); // 대기 큐가 가득 찬 경우 예외 발생
         }
 
-        // 동시성 처리를 위해 Redisson 락 사용
-        RLock lock = redissonClient.getLock("lock:course:" + courseId);
-        try {
-            boolean isLockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
-            if (!isLockAcquired) {
-                throw new MyException(MyErrorCode.QUEUE_SYSTEM_BUSY);
-            }
-
-            // 대기 큐에 사용자 추가 (현재 시간 기준으로 점수 설정)
+        // 동시성 문제를 방지하기 위해 분산 락을 사용
+        executeWithLock("lock:course:" + courseId, () -> {
             long timestamp = System.currentTimeMillis();
-            redisTemplate.opsForZSet().add(waitingQueueKey, userId, timestamp);
+            redisTemplate.opsForZSet().add(waitingQueueKey, userId, timestamp); // 대기 큐에 사용자 추가
+            redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId)); // 강좌 ID를 관리용 Set에 추가
+            log.info("대기열에 추가 - courseId: {}, userId: {}", courseId, userId);
+        });
 
-            // 강좌 ID를 Redis Set에 추가 (스케줄러에서 큐를 관리하기 위함)
-            redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId));
-
-            log.info("대기열에 추가 - {}, {} ({}초)", waitingQueueKey, userId, timestamp);
-
-            return AddQueueResponse.of("Added to the waiting queue.");
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new MyException(MyErrorCode.LOCK_ACQUISITION_FAILED);
-        } finally {
-            // 락 해제
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
-        }
+        return AddQueueResponse.of("Added to the waiting queue.");
     }
 
     /**
-     * 결제 완료 로직: 활성 큐에서 사용자를 제거하고, DB에 저장하여 상태를 PAYED로 업데이트합니다.
+     * 결제 완료 처리: 활성 큐에서 사용자를 제거하고 DB 상태를 PAYED로 업데이트
      *
      * @param courseId 강좌 ID
      * @param userId   사용자 ID
      */
-    public void completePayment(Long courseId, String userId) {
+    public void completePayment(@NonNull Long courseId, @NonNull String userId) {
         String activeQueueKey = ACTIVE_QUEUE_KEY + courseId;
-        RLock lock = redissonClient.getLock("lock:course:" + courseId);
 
-        try {
-            boolean isLockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
-            if (!isLockAcquired) {
-                throw new MyException(MyErrorCode.QUEUE_SYSTEM_BUSY);
-            }
-
-            // 활성 큐에서 사용자 제거
+        executeWithLock("lock:course:" + courseId, () -> {
             boolean removed = redisTemplate.opsForZSet().remove(activeQueueKey, userId) != null;
             if (!removed) {
-                throw new MyException(MyErrorCode.USER_NOT_IN_ACTIVE_QUEUE);
+                throw new MyException(MyErrorCode.USER_NOT_IN_ACTIVE_QUEUE); // 활성 큐에 사용자가 없는 경우 예외 발생
             }
-
-            // UserCourse 상태를 PAYED로 업데이트
-            updateUserCourseStatus(courseId, userId, EnrollmentStatus.PAYED);
-
+            updateUserCourseStatus(courseId, userId, EnrollmentStatus.PAYED); // 상태를 PAYED로 업데이트
             log.info("결제 완료 처리 - courseId: {}, userId: {}", courseId, userId);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new MyException(MyErrorCode.LOCK_ACQUISITION_FAILED);
-        } finally {
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
-        }
+        });
     }
 
     /**
-     * 결제 취소 로직: UserCourse 상태를 CANCELED로 업데이트합니다.
+     * 결제 취소 처리: 상태를 CANCELED로 업데이트
      *
      * @param courseId 강좌 ID
      * @param userId   사용자 ID
      */
-    public void cancelPayment(Long courseId, String userId) {
-        RLock lock = redissonClient.getLock("lock:course:" + courseId);
-
-        try {
-            boolean isLockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
-            if (!isLockAcquired) {
-                throw new MyException(MyErrorCode.QUEUE_SYSTEM_BUSY);
-            }
-
-            // UserCourse 상태를 CANCELED로 업데이트
-            updateUserCourseStatus(courseId, userId, EnrollmentStatus.CANCELED);
-
+    public void cancelPayment(@NonNull Long courseId, @NonNull String userId) {
+        executeWithLock("lock:course:" + courseId, () -> {
+            updateUserCourseStatus(courseId, userId, EnrollmentStatus.CANCELED); // 상태를 CANCELED로 업데이트
             log.info("결제 취소 처리 - courseId: {}, userId: {}", courseId, userId);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new MyException(MyErrorCode.LOCK_ACQUISITION_FAILED);
-        } finally {
-            if (lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
-        }
+        });
     }
 
     /**
-     * TTL 초과 사용자 처리: 활성 큐에서 TTL이 초과된 사용자를 제거하고 상태를 CANCELED로 업데이트합니다.
+     * 스케줄러: 모든 큐 관리
+     * - TTL 초과된 사용자 제거
+     * - 활성 큐의 빈자리를 대기 큐에서 채움
      */
     @Scheduled(fixedRate = 60000) // 1분마다 실행
-    public void manageActiveQueueTTL() {
+    public void manageAllQueues() {
         Set<String> courseIds = redisTemplate.opsForSet().members(COURSE_IDS_SET);
         if (courseIds == null || courseIds.isEmpty()) {
             log.info("관리할 큐가 없습니다.");
             return;
         }
 
-        long currentTime = System.currentTimeMillis();
         for (String courseId : courseIds) {
-            String activeQueueKey = ACTIVE_QUEUE_KEY + courseId;
+            manageWaitQueues(Long.parseLong(courseId)); // 대기 큐 관리
+            manageActiveQueues(Long.parseLong(courseId)); // 활성 큐 관리
+        }
+    }
 
-            // TTL 초과 사용자 검색
-            Set<String> expiredUsers = redisTemplate.opsForZSet()
-                    .rangeByScore(activeQueueKey, 0, currentTime - ACTIVE_QUEUE_TTL * 1000);
+    /**
+     * 대기 큐 관리: 활성 큐의 빈자리를 대기 큐에서 채움
+     *
+     * @param courseId 강좌 ID
+     */
+    private void manageWaitQueues(@NonNull Long courseId) {
+        String waitingQueueKey = WAITING_QUEUE_KEY + courseId;
+        String activeQueueKey = ACTIVE_QUEUE_KEY + courseId;
 
-            if (expiredUsers != null && !expiredUsers.isEmpty()) {
-                for (String userId : expiredUsers) {
-                    // 활성 큐에서 제거하고 UserCourse 상태를 CANCELED로 업데이트
-                    redisTemplate.opsForZSet().remove(activeQueueKey, userId);
-                    updateUserCourseStatus(Long.parseLong(courseId), userId, EnrollmentStatus.CANCELED);
+        // 활성 큐 크기 확인
+        Long activeQueueSize = redisTemplate.opsForZSet().size(activeQueueKey);
+        if (activeQueueSize == null) activeQueueSize = 0L;
 
-                    log.info("TTL 초과 사용자 처리 - courseId: {}, userId: {}", courseId, userId);
+        // 활성 큐의 빈자리 계산
+        int availableSlots = MAX_ACTIVE_QUEUE_SIZE - activeQueueSize.intValue();
+        if (availableSlots <= 0) return;
+
+        // 대기 큐에서 활성 큐로 사용자 이동
+        Set<ZSetOperations.TypedTuple<String>> usersToMove = redisTemplate.opsForZSet()
+                .rangeWithScores(waitingQueueKey, 0, availableSlots - 1);
+        if (usersToMove != null) {
+            for (ZSetOperations.TypedTuple<String> user : usersToMove) {
+                String userId = user.getValue();
+
+                // userId가 null인 경우 처리
+                if (userId == null) {
+                    log.warn("대기 큐에서 null userId를 발견했습니다. courseId: {}", courseId);
+                    continue;
                 }
+
+                // 활성 큐에 추가
+                redisTemplate.opsForZSet().add(activeQueueKey, userId, System.currentTimeMillis());
+                redisTemplate.opsForZSet().remove(waitingQueueKey, userId);
+                log.info("대기 큐 -> 활성 큐 이동 - courseId: {}, userId: {}", courseId, userId);
+            }
+        }
+    }
+
+    /**
+     * 활성 큐 관리: TTL 초과된 사용자 제거
+     *
+     * @param courseId 강좌 ID
+     */
+    private void manageActiveQueues(@NonNull Long courseId) {
+        String activeQueueKey = ACTIVE_QUEUE_KEY + courseId;
+
+        // TTL 초과된 사용자 검색
+        long currentTime = System.currentTimeMillis();
+        Set<String> expiredUsers = redisTemplate.opsForZSet()
+                .rangeByScore(activeQueueKey, 0, currentTime - ACTIVE_QUEUE_TTL * 1000);
+        if (expiredUsers != null) {
+            for (String userId : expiredUsers) {
+                redisTemplate.opsForZSet().remove(activeQueueKey, userId);
+                updateUserCourseStatus(courseId, userId, EnrollmentStatus.CANCELED); // 상태를 CANCELED로 업데이트
+                log.info("TTL 초과 사용자 제거 - courseId: {}, userId: {}", courseId, userId);
             }
         }
     }
@@ -397,7 +397,7 @@ public class RedisQueueFacade {
      * @param userId   사용자 ID
      * @param status   새로운 상태 (PAYED, CANCELED 등)
      */
-    private void updateUserCourseStatus(Long courseId, String userId, EnrollmentStatus status) {
+    private void updateUserCourseStatus(@NonNull Long courseId, @NonNull String userId, EnrollmentStatus status) {
         User user = userRepository.findById(Long.parseLong(userId))
                 .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
         Course course = courseRepository.findById(courseId)
@@ -411,5 +411,27 @@ public class RedisQueueFacade {
 
         log.info("UserCourse 상태 업데이트 - courseId: {}, userId: {}, status: {}", courseId, userId, status);
     }
-}
 
+    /**
+     * 분산 락 처리 유틸리티 메서드
+     *
+     * @param lockKey 락 키
+     * @param task    수행할 작업
+     */
+    private void executeWithLock(String lockKey, Runnable task) {
+        RLock lock = redissonClient.getLock(lockKey);
+        try {
+            if (!lock.tryLock(5, TimeUnit.SECONDS)) {
+                throw new MyException(MyErrorCode.QUEUE_SYSTEM_BUSY); // 락을 얻지 못한 경우 예외 발생
+            }
+            task.run(); // 작업 수행
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new MyException(MyErrorCode.LOCK_ACQUISITION_FAILED); // 인터럽트 발생 시 예외 처리
+        } finally {
+            if (lock.isHeldByCurrentThread()) {
+                lock.unlock(); // 락 해제
+            }
+        }
+    }
+}
