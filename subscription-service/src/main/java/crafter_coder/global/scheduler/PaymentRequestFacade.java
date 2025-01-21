@@ -1,6 +1,10 @@
 package crafter_coder.global.scheduler;
 
 import crafter_coder.domain.payment.dto.PaymentReqDto;
+import crafter_coder.domain.payment.dto.PaymentResDto;
+import crafter_coder.domain.payment.model.Payment;
+import crafter_coder.domain.payment.model.PaymentStatus;
+import crafter_coder.domain.payment.repository.PaymentRepository;
 import crafter_coder.domain.program.model.Program;
 import crafter_coder.domain.program.model.ProgramStatus;
 import crafter_coder.domain.program.repository.ProgramRepository;
@@ -23,6 +27,7 @@ import java.util.List;
 public class PaymentRequestFacade {
     private final ProgramRepository programRepository;
     private final PaymentApiClient paymentApiClient;
+    private final PaymentRepository paymentRepository;
 
     @Transactional
     public void processProgramPayments(int dayOfMonth) {
@@ -41,14 +46,17 @@ public class PaymentRequestFacade {
                 // request body를 암호화해서 결제 요청
                 AesUtil aes = AesUtil.getInstance();
                 try {
-                    paymentApiClient.requestPayment(
+                    PaymentResDto response = paymentApiClient.requestPayment(
                             PaymentReqDto.of(
                                     aes.encryptData(withdrawAccountNumber),
                                     aes.encryptData(depositAccountNumber),
                                     amount,
                                     aes.encryptData(password)
                             ));
-                } catch (RestApiException e) { // 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경(try-catch)
+
+                    Payment payment = Payment.of(response.paymentId(), amount, PaymentStatus.DONE, subscription);
+                    paymentRepository.save(payment);
+                } catch (RestApiException e) { // 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경
                     if (e.getMessage().contains("잔액 부족")) {
                         log.info("잔액 부족으로 결제 실패, 구독 상태를 INACTIVE로 변경합니다. subscriptionId={}", subscription.getId());
                         subscription.updateStatus(SubscriptionStatus.INACTIVE);

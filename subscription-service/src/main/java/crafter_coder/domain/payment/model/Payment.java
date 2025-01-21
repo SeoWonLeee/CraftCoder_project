@@ -16,7 +16,6 @@ import static lombok.AccessLevel.PROTECTED;
 @NoArgsConstructor(access = PROTECTED)
 public class Payment {
     @Id
-    @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -29,12 +28,14 @@ public class Payment {
     @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
-    private Payment(BigDecimal amount, PaymentStatus paymentStatus) {
+    private Payment(Long id, BigDecimal amount, PaymentStatus paymentStatus, Subscription subscription) {
+        this.id = id;
         this.amount = amount;
         this.paymentStatus = paymentStatus;
+        this.subscription = subscription;
     }
 
-    public static Payment of(BigDecimal amount, PaymentStatus paymentStatus) {
-        return new Payment(amount, paymentStatus);
+    public static Payment of(Long id, BigDecimal amount, PaymentStatus paymentStatus, Subscription subscription) {
+        return new Payment(id, amount, paymentStatus, subscription);
     }
 }
