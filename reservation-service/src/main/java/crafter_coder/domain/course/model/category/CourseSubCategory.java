@@ -24,7 +24,7 @@ public enum CourseSubCategory {
     CHILD_EDUCATION(CourseCategory.PARENTING, "자녀교육"),
     ;
 
-    private final CourseCategory category; // 상위 카테고리
-    private final String description; // 한글 표현
+    private final CourseCategory category;
+    private final String description;
 
 }

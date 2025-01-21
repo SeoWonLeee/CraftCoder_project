@@ -32,7 +32,7 @@ public class InstructorRequest {
     @Column(nullable = false)
     private RequestType type;
 
-    @Column(name = "requested_at", nullable = false)
+    @Column(nullable = false)
     private LocalDate requestedAt;
 
     @Column(nullable = true)
@@ -72,5 +72,19 @@ public class InstructorRequest {
         request.requestedAt = LocalDate.now();
         request.reason = reason;
         return request;
+    }
+
+
+    public void markAsCompleted() {
+        this.status = "COMPLETED";
+    }
+
+    public void approve() {
+        this.status = "APPROVED";
+    }
+
+    public void reject(String reason) {
+        this.status = "REJECTED";
+        this.reason = reason;
     }
 }

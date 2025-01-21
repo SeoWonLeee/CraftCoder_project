@@ -25,7 +25,7 @@ public class InstructorRequestController {
                 instructorId, courseId, requestDto.getStatus(), requestDto.getDayOfWeek(),
                 requestDto.getStartTime(), requestDto.getEndTime(), requestDto.getMaxCapacity(),
                 requestDto.getStartDate(), requestDto.getEndDate());
-        return ResponseEntity.ok(ResponseDto.of(null, "강좌 수정 요청"));
+        return ResponseEntity.ok(ResponseDto.of(null, "강좌 수정 요청 조회"));
     }
 
     @PostMapping("/courses/{courseId}/delete")
@@ -34,7 +34,7 @@ public class InstructorRequestController {
             @PathVariable Long courseId,
             @RequestBody InstructorRequestDto requestDto) {
         requestService.createDeleteRequest(instructorId, courseId, requestDto.getReason());
-        return ResponseEntity.ok(ResponseDto.of(null, "강좌 삭제 요청"));
+        return ResponseEntity.ok(ResponseDto.of(null, "강좌 삭제 요청 조회"));
     }
 
     @GetMapping
