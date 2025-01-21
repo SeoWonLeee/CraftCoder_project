@@ -45,18 +45,18 @@ public class RedisQueueFacade {
 
     public AddQueueResponse addApplyToWaitingQueue(Long courseId, String userId) {
         /**
-         * ㅇㅇㅇㄹㅇㄹㅁㄴㄹ
+         * 대기큐에 값 넣기(Sorted Set 자료구조 사용)
          */
         String waitingQueueKey = WAITING_QUEUE_KEY + courseId; // 대기큐에 들어갈 (강좌 + 사용자) 키
         Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey); // 대기 큐 크기 확인
 
         log.info("courseId queueSize = {}", queueSize);
 
-        if (queueSize == null || queueSize >= MAX_WAITING_QUEUE_SIZE) {
+        if (queueSize == null || queueSize >= MAX_WAITING_QUEUE_SIZE) { // 해당 강좌 신청에 대한 대기큐 지정 인원이 넘으면 취소 처리
             throw new MyException(MyErrorCode.QUEUE_FULL);
         }
 
-        RLock lock = redissonClient.getLock("lock:course:" + courseId);
+        RLock lock = redissonClient.getLock("lock:course:" + courseId); // 추후 동시성 문제를 고려해서 분산 락 사용
         try {
             // 락 확인
             boolean isLockAcquired = lock.tryLock(5, TimeUnit.SECONDS);
@@ -66,7 +66,7 @@ public class RedisQueueFacade {
             // 대기 큐에 추가
             long timestamp = System.currentTimeMillis();
             redisTemplate.opsForZSet().add(waitingQueueKey, userId, timestamp);
-            redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId));
+            redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId)); // manageAllQueues 메서드에서 강좌 ID 별로 관리하기 위함
 
             log.info("대기열에 추가 - {}, {} ({}초)", waitingQueueKey,userId, timestamp);
 
@@ -81,20 +81,8 @@ public class RedisQueueFacade {
         }
     }
 
-    /**
-     * 결제 완료 처리
-     */
-    public void completePayment(Long courseId, String userId) {
-        String activeQueueKey = ACTIVE_QUEUE_KEY + courseId;
 
-        // RDB에 결과 저장
-        saveToDatabase(courseId, userId); // 미구현
-
-        // 활성 큐에서 제거
-        redisTemplate.opsForHash().delete(activeQueueKey, userId);
-    }
-
-    private void saveToDatabase(Long courseId, String userId) {
+    private void saveToDatabase(Long courseId, String userId) { // 결제 완료 후, db 저장 로직
         // RDB 저장 로직 구현
         User user = userRepository.findById(Long.parseLong(userId))
                 .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
@@ -118,13 +106,14 @@ public class RedisQueueFacade {
     /**
      * 스케줄러 - 모든 강좌에 대해 대기열과 활성 큐 관리
      */
-    @Scheduled(fixedRate = 10000) // 1초마다 실행
+    @Scheduled(fixedRate = 10000) // 1초마다 실행 - 수동 검증을 위해 10초로 설정
     public void manageAllQueues() {
 
         log.info("스케줄러 동기화 확인 : {}초", System.currentTimeMillis());
         Set<String> courseIds = redisTemplate.opsForSet().members(COURSE_IDS_SET);
         if (courseIds == null || courseIds.isEmpty()) {
             log.info("강좌 신청 정보가 없습니다.");
+            return;
         }
 
         for (String courseId : courseIds) {
@@ -147,7 +136,7 @@ public class RedisQueueFacade {
             Double entryTime = entry.getScore(); // 활성 큐의 점수는 사용자의 활성화 시간
 
             log.info("처리 중 - courseId: {}, userId: {}, 활성화 시간: {}", courseId, userId, entryTime);
-
+            // 강좌 결제 확인 로직이 없기에 활성큐에 오면 바로 저장하게 처리 / 결제 확인 로직 필요
             saveToDatabase(courseId, userId); // 처리 로직: RDB 저장 등
             redisTemplate.opsForZSet().remove(activeQueueKey, userId);// 활성 큐에서 사용자 제거
 
@@ -168,7 +157,7 @@ public class RedisQueueFacade {
             return;
         }
 
-        // 2. 만료된 사용자 제거
+        // 2. 활성큐에서 만료된 사용자(시간 초과) 제거 / 결제 취소도 고려를 해야할까?
         int removedActiveQueueSize = 0;
         long currentTime = System.currentTimeMillis();
         for (ZSetOperations.TypedTuple<String> entry : activeQueue) {
@@ -189,7 +178,7 @@ public class RedisQueueFacade {
         if (availableSlots <= 0) {  // 활성 큐에 빈 자리가 있을 경우
             return;
         }
-
+        // 4. 활성 큐 빈자리 수만큼 대기큐 값 제거 + 활성큐 추가
         Set<ZSetOperations.TypedTuple<String>> users = redisTemplate.opsForZSet().rangeWithScores(waitingQueueKey, 0, availableSlots - 1); // 대기 큐에서 가져오기
         if (users != null && !users.isEmpty()) {
             for (ZSetOperations.TypedTuple<String> entry : users) {
