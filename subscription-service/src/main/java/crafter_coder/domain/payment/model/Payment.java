@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 import static jakarta.persistence.FetchType.LAZY;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -18,7 +20,7 @@ public class Payment {
     private Long id;
 
     @Column(nullable = false)
-    private int amount;
+    private BigDecimal amount;
 
     @Column(nullable = false)
     private PaymentStatus paymentStatus;
@@ -27,12 +29,12 @@ public class Payment {
     @JoinColumn(name = "subscription_id", nullable = false)
     private Subscription subscription;
 
-    private Payment(int amount, PaymentStatus paymentStatus) {
+    private Payment(BigDecimal amount, PaymentStatus paymentStatus) {
         this.amount = amount;
         this.paymentStatus = paymentStatus;
     }
 
-    public static Payment of(int amount, PaymentStatus paymentStatus) {
+    public static Payment of(BigDecimal amount, PaymentStatus paymentStatus) {
         return new Payment(amount, paymentStatus);
     }
 }

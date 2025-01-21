@@ -2,11 +2,13 @@ package crafter_coder.openFeign.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(url = "***")
+@FeignClient(url = "http://13.209.87.161:8080/accounts")
 public interface AccountApiClient {
-    // 아직 1팀에서 정확히 뭐를 반환해줄지 모르겠어서 일단 Boolean으로 했습니다.
-    @GetMapping("/accounts/{accountNumber}")
+
+    // 계좌 번호가 실제로 존재하는지 확인할 수 있도록 api가 필요해보이는데
+    @GetMapping("/{accountNumber}")
     public Boolean checkAccountNumber(@RequestParam String accountNumber);
 }

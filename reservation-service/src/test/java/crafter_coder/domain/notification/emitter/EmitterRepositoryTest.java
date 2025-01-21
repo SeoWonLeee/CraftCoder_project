@@ -1,5 +1,7 @@
 package crafter_coder.domain.notification.emitter;
 
+import org.aspectj.lang.annotation.After;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +17,13 @@ class EmitterRepositoryTest {
 
     @Autowired
     private EmitterRepository emitterRepository;
+
+    @AfterEach
+    public void after() {
+        emitterRepository.deleteAllEmittersByUserId("1");
+        emitterRepository.deleteAllEventCacheByUserId("1");
+    }
+
 
     @Test
     @DisplayName("emitters concurrentHashMap에 sseEmitter를 저장한다.")

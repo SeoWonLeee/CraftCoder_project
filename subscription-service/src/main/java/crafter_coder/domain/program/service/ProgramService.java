@@ -23,7 +23,7 @@ public class ProgramService {
 
         checkIfProgramNameAlreadyExists(programReqDto);
         // 전달받은 계좌 번호가 실제 존재하는지 확인을 해야할거같은데
-        accountApiClient.checkAccountNumber(programReqDto.accountNumber());
+//        accountApiClient.checkAccountNumber(programReqDto.accountNumber());
 
         Program program = ProgramReqDto.toEntity(programReqDto);
         programRepository.save(program);
