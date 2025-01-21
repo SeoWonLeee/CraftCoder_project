@@ -37,25 +37,39 @@ public class Course {
     private CourseSchedule courseSchedule;
 
     @Column(nullable = false)
-    private Long instructorId; // 강사 ID
+    private Long instructorId;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CourseStatus status;
 
     @Embedded
-    private EnrollmentCapacity enrollmentCapacity; // 수강 정원
+    private EnrollmentCapacity enrollmentCapacity;
 
     @Column(nullable = false)
-    private int price; // 수강료
+    private int price;
 
     @Column(nullable = false)
-    private String place; // 강좌 장소
+    private String place;
 
     @Column(nullable = false)
-    private LocalDate enrollmentDeadline; // 수강신청 데드라인
+    private LocalDate enrollmentDeadline;
 
-    // 공통 필드 설정
+    public void updateCourseDetails(String name, String dayOfWeek, String startTime, String endTime, String place, int maxCapacity) {
+        this.name = name;
+        this.courseSchedule.updateSchedule(dayOfWeek, startTime, endTime);
+        this.place = place;
+        this.enrollmentCapacity.updateCapacity(maxCapacity);
+    }
+
+    public boolean canBeDeleted() {
+        return this.enrollmentCapacity.getCurrentEnrollment() == 0;
+    }
+
+    public void updateStatus(String status) {
+        this.status = CourseStatus.valueOf(status.toUpperCase());
+    }
+
     private void setFields(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
                            CourseSchedule courseSchedule, EnrollmentCapacity enrollmentCapacity,
                            int price, String place, LocalDate enrollmentDeadline) {
@@ -70,8 +84,8 @@ public class Course {
     }
 
     private Course(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
-                     CourseSchedule courseSchedule, Long instructorId, CourseStatus status,
-                     EnrollmentCapacity enrollmentCapacity, int price, String place, LocalDate enrollmentDeadline) {
+                   CourseSchedule courseSchedule, Long instructorId, CourseStatus status,
+                   EnrollmentCapacity enrollmentCapacity, int price, String place, LocalDate enrollmentDeadline) {
         this.setFields(name, courseCategory, courseDuration, courseSchedule, enrollmentCapacity, price, place, enrollmentDeadline);
         this.instructorId = instructorId;
         this.status = status;
@@ -86,25 +100,30 @@ public class Course {
                 courseDuration,
                 courseSchedule,
                 instructorId,
-                CourseStatus.OPEN, // 초기 상태는 OPEN
-                EnrollmentCapacity.of(maxCapacity, 0), // 초기 등록 인원은 0
+                CourseStatus.OPEN,
+                EnrollmentCapacity.of(maxCapacity, 0),
                 price,
                 place,
                 enrollmentDeadline
         );
     }
 
-    // 수정 메서드
     public void update(CourseRequest request) {
-        this.setFields(
-                request.getName(),
-                CourseSubCategory.valueOf(request.getCourseCategory()),
-                CourseDuration.of(LocalDate.parse(request.getStartDate()), LocalDate.parse(request.getEndDate())),
-                CourseSchedule.of(request.getDayOfWeek(), LocalTime.parse(request.getStartTime()), LocalTime.parse(request.getEndTime())),
-                EnrollmentCapacity.of(request.getMaxCapacity(), this.enrollmentCapacity.getCurrentEnrollment()),
-                request.getPrice(),
-                request.getPlace(),
-                LocalDate.parse(request.getEnrollmentDeadline())
+        this.name = request.getName();
+        this.courseCategory = CourseSubCategory.valueOf(request.getCourseCategory());
+        this.courseDuration = CourseDuration.of(
+                LocalDate.parse(request.getStartDate()),
+                LocalDate.parse(request.getEndDate())
         );
+        this.courseSchedule = CourseSchedule.of(
+                request.getDayOfWeek(),
+                LocalTime.parse(request.getStartTime()),
+                LocalTime.parse(request.getEndTime())
+        );
+        this.place = request.getPlace();
+        this.price = request.getPrice();
+        this.enrollmentCapacity.updateCapacity(request.getMaxCapacity());
+        this.enrollmentDeadline = LocalDate.parse(request.getEnrollmentDeadline());
     }
+
 }

@@ -13,10 +13,10 @@ import static lombok.AccessLevel.PROTECTED;
 public class EnrollmentCapacity {
 
     @Column(nullable = false)
-    private int maxCapacity; // 최대 수강 인원
+    private int maxCapacity;
 
     @Column(nullable = false)
-    private int currentEnrollment; // 현재 수강 인원
+    private int currentEnrollment;
 
     private EnrollmentCapacity(int maxCapacity, int currentEnrollment) {
         this.maxCapacity = maxCapacity;
@@ -25,5 +25,9 @@ public class EnrollmentCapacity {
 
     public static EnrollmentCapacity of(int maxCapacity, int currentEnrollment) {
         return new EnrollmentCapacity(maxCapacity, currentEnrollment);
+    }
+
+    public void updateCapacity(int maxCapacity) {
+        this.maxCapacity = maxCapacity;
     }
 }

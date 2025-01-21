@@ -12,5 +12,5 @@ public enum CourseCategory {
     PARENTING("육아"),
     ;
 
-    private final String description; // 한글 표현
+    private final String description;
 }

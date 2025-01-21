@@ -20,13 +20,11 @@ public class UserResponseDto {
     private String username;
     private String name;
     private String phoneNumber;
-    private String email;
     private LocalDate birthDate;
     private String accountId;
     private String accountPassword;
     private Role role;
     private ActiveStatus status;
-
 
     public static UserResponseDto of(User user) {
         return UserResponseDto.builder()
@@ -34,10 +32,11 @@ public class UserResponseDto {
                 .username(user.getUsername())
                 .name(user.getName())
                 .phoneNumber(user.getPhoneNumber())
-                .email(user.getEmail())
-                .birthDate(LocalDate.parse(user.getBirthDate().toString()))
-                .role(Role.valueOf(user.getRole().name()))
-                .status(ActiveStatus.valueOf(user.getStatus().name()))
+                .birthDate(user.getBirthDate())
+                .accountId(user.getAccountId())
+                .accountPassword(user.getAccountPassword())
+                .role(user.getRole())
+                .status(user.getStatus())
                 .build();
     }
 }

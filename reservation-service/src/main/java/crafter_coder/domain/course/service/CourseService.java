@@ -20,7 +20,6 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
 
-    //전체 강좌 목록 가져오기
     public List<CourseListResponse> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
         return courses.stream()
@@ -28,20 +27,17 @@ public class CourseService {
                 .collect(Collectors.toList());
     }
 
-    //강좌 상세 가져오기
     public Optional<CourseDetailResponse> getCourseDetail(Long courseId) {
         return courseRepository.findById(courseId)
                 .map(CourseDetailResponse::fromEntity);
     }
 
-    // 강좌 생성
     public Long createCourse(CourseRequest request, Long instructorId) {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
         return course.getId();
     }
 
-    // 강좌 수정
     public void updateCourse(Long courseId, CourseRequest request, Long instructorId) {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 강좌를 찾을 수 없습니다."));
@@ -51,7 +47,3 @@ public class CourseService {
         course.update(request);
     }
 }
-
-
-
-

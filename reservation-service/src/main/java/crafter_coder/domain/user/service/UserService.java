@@ -18,21 +18,16 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    //회원가입
     public UserResponseDto register(RegisterRequestDto registerRequestDto) {
-        //중복 사용자 확인
         validatorUserDoesNotExist(registerRequestDto);
 
-        //비밀번호 암호화
         String encryptedPassword = passwordEncoder.encode(registerRequestDto.getPassword());
 
-        // User 객체 생성 및 초기 비밀번호 설정
         User user = User.of(
                 registerRequestDto.getUsername(),
                 encryptedPassword,
                 registerRequestDto.getName(),
                 registerRequestDto.getPhoneNumber(),
-                registerRequestDto.getEmail(),
                 registerRequestDto.getBirthDate(),
                 registerRequestDto.getAccountId(),
                 registerRequestDto.getAccountPassword(),
@@ -40,13 +35,10 @@ public class UserService {
                 registerRequestDto.getStatus()
         );
 
-        //사용자 저장
         userRepository.save(user);
-        //응답 dto
         return userMapper.toDto(user);
     }
 
-    //로그인
     public UserResponseDto login(LoginRequestDto loginRequestDto) {
         User user = findUserByUsernameOrThrow(loginRequestDto);
 

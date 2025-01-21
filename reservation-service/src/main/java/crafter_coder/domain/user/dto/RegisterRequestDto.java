@@ -27,19 +27,20 @@ public class RegisterRequestDto {
     private Role role;
     private ActiveStatus status;
 
+    private String specialization;
+
     public User toEntity() {
         return User.of(
                 username,
                 password,
                 name,
                 phoneNumber,
-                email,
                 birthDate,
                 accountId,
                 accountPassword,
                 role,
-                status
+                status,
+                specialization
         );
     }
-
 }

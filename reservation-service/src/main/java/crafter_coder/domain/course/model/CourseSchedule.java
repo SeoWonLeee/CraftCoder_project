@@ -9,7 +9,8 @@ import java.time.LocalTime;
 
 import static lombok.AccessLevel.*;
 
-@Embeddable @Getter
+@Embeddable
+@Getter
 @NoArgsConstructor(access = PROTECTED)
 public class CourseSchedule {
 
@@ -30,5 +31,11 @@ public class CourseSchedule {
 
     public static CourseSchedule of(String dayOfWeek, LocalTime startTime, LocalTime endTime) {
         return new CourseSchedule(dayOfWeek, startTime, endTime);
+    }
+
+    public void updateSchedule(String dayOfWeek, String startTime, String endTime) {
+        this.dayOfWeek = dayOfWeek;
+        this.startTime = LocalTime.parse(startTime);
+        this.endTime = LocalTime.parse(endTime);
     }
 }

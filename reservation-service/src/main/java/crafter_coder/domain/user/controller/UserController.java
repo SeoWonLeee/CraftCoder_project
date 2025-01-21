@@ -20,29 +20,24 @@ public class UserController {
     private final UserProfileService userProfileService;
     private final BlacklistService blacklistService;
 
-    //회원가입
     @PostMapping("/register")
     public ResponseEntity<UserResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto) {
         UserResponseDto response = userService.register(registerRequestDto);
         return ResponseEntity.ok(response);
     }
 
-    //로그인
     @PostMapping("/login")
     public ResponseEntity<UserResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         UserResponseDto response = userService.login(loginRequestDto);
         return ResponseEntity.ok(response);
     }
 
-    //로그아웃
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletRequest request) {
-        // 세션 무효화
         request.getSession().invalidate();
         return ResponseEntity.ok("Logged out successfully.");
     }
 
-    //회원정보수정
     @PutMapping("/update/profile/{username}")
     public ResponseEntity<UserResponseDto> updateProfile(@PathVariable String username,
                                                          @Valid @RequestBody UpdateProfileRequestDto updateProfileRequestDto) {
@@ -50,7 +45,6 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    //비밀번호 변경
     @PatchMapping("/update/password/{username}")
     public ResponseEntity<String> updatePassword(@PathVariable String username,
                                                  @Valid @RequestBody UpdatePasswordRequestDto updatePasswordRequestDto) {
@@ -58,7 +52,6 @@ public class UserController {
         return ResponseEntity.ok("Password updated successfully.");
     }
 
-    // 회원 탈퇴
     @DeleteMapping("/{username}")
     public ResponseEntity<String> deactivateUser(@PathVariable String username) {
         userProfileService.deactivateUser(username);

@@ -19,7 +19,6 @@ public class UserProfileService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
 
-    //회원 프로필 수정
     public UserResponseDto updateProfile(String username, UpdateProfileRequestDto updateProfileRequestDto){
         User user = findUserByUsernameOrThrow(username);
 
@@ -29,7 +28,6 @@ public class UserProfileService {
         return userMapper.toDto(user);
     }
 
-    //회원 비밀면호 수정
     public void UpdateUserPassword(String username, UpdatePasswordRequestDto updatePasswordRequestDto){
         User user = findUserByUsernameOrThrow(username);
 
@@ -39,7 +37,6 @@ public class UserProfileService {
         userRepository.save(user);
     }
 
-    //회원탈퇴
     public void deactivateUser(String username) {
         User user = findUserByUsernameOrThrow(username);
         user.updateStatus(ActiveStatus.DEACTIVED);
@@ -67,8 +64,6 @@ public class UserProfileService {
             user.updateName(updateProfileRequestDto.getName());
         if (updateProfileRequestDto.getPhoneNumber() != null)
             user.updatePhoneNumber(updateProfileRequestDto.getPhoneNumber());
-        if (updateProfileRequestDto.getEmail() != null)
-            user.updateEmail(updateProfileRequestDto.getEmail());
         if (updateProfileRequestDto.getBirthDate() != null)
             user.updateBirthDate(updateProfileRequestDto.getBirthDate());
         if (updateProfileRequestDto.getAccountId() != null)
