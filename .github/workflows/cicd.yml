@@ -58,10 +58,10 @@ jobs:
       uses: appleboy/scp-action@v0.1.7
       with:
         host: ${{ secrets.EC2_HOST }}
-        username: ubuntu
+        username: ec2-user
         key: ${{ secrets.EC2_KEY }}
         source: "docker-compose.yml"
-        target: /home/ubuntu
+        target: /home/ec2-user
 
     # 6. Gradle 빌드
     - name: Build with Gradle
@@ -86,7 +86,7 @@ jobs:
       with:
         key: ${{secrets.EC2_KEY}}
         host: ${{secrets.EC2_HOST}}
-        username: ubuntu
+        username: ec2-user
         script: |
           whoami
           sudo docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_TOKEN}}
