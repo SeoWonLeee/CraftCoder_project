@@ -1,5 +1,6 @@
-package crafter_coder.util;
+package crafter_coder.global.util;
 
+import crafter_coder.global.exception.AesEncryptException;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.crypto.BadPaddingException;
@@ -8,19 +9,24 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
+import java.security.*;
 import java.util.Base64;
 
+// 싱글톤으로 관리
 public class AesUtil {
+    private static final AesUtil INSTANCE = new AesUtil();
 
-    @Value("${aes.secretKey}")
-    private static String SECRET_KEY;
+    @Value("${aes.secret-key}")
+    private String SECRET_KEY;
 
-    public String encrypt(String plainText) throws InvalidAlgorithmParameterException, NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException {
+    private AesUtil() {
+    }
+
+    public static AesUtil getInstance() {
+        return INSTANCE;
+    }
+
+    public String encrypt(String plainText) throws GeneralSecurityException {
         // Generate random IV
         byte[] iv = new byte[16];
         SecureRandom random = new SecureRandom();
@@ -62,5 +68,13 @@ public class AesUtil {
 
         // Decrypt data
         return new String(cipher.doFinal(encryptedData));
+    }
+
+    public String encryptData(String plainText) {
+        try {
+            return encrypt(plainText);
+        } catch(GeneralSecurityException e) {
+            throw new AesEncryptException(e.getMessage());
+        }
     }
 }
