@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
 
-
 @Entity
 @Getter
 @NoArgsConstructor(access = PROTECTED)
@@ -126,4 +125,7 @@ public class Course {
         this.enrollmentDeadline = LocalDate.parse(request.getEnrollmentDeadline());
     }
 
+    public Long getInstructorId() {
+        return instructorId;
+    }
 }
