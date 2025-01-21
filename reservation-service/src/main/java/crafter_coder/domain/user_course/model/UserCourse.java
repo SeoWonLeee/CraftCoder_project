@@ -46,4 +46,12 @@ public class UserCourse {
         LocalDate enrollmentDeadline = course.getEnrollmentDeadline();
         return new UserCourse(user, course, EnrollmentStatus.APPLICATED, enrollmentDeadline);
     }
+
+    // 상태 업데이트 메서드 추가
+    public void updateStatus(EnrollmentStatus newStatus) {
+        if (this.enrollmentStatus == newStatus) {
+            throw new IllegalStateException("이미 해당 상태입니다.");
+        }
+        this.enrollmentStatus = newStatus;
+    }
 }
