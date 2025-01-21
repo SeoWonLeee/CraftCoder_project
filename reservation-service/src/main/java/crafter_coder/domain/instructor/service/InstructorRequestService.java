@@ -1,9 +1,11 @@
 package crafter_coder.domain.instructor.service;
 
 import crafter_coder.domain.course.model.Course;
+import crafter_coder.domain.course.model.CourseStatus;
 import crafter_coder.domain.course.repository.CourseRepository;
 import crafter_coder.domain.instructor.dto.InstructorRequestDto;
 import crafter_coder.domain.instructor.model.InstructorRequest;
+import crafter_coder.domain.instructor.model.RequestType;
 import crafter_coder.domain.instructor.repository.InstructorRequestRepository;
 import crafter_coder.domain.user.model.Role;
 import crafter_coder.domain.user.model.User;
@@ -61,6 +63,11 @@ public class InstructorRequestService {
     public void approveRequest(Long requestId) {
         InstructorRequest request = requestRepository.findById(requestId)
                 .orElseThrow(() -> new MyException(MyErrorCode.REQUEST_NOT_FOUND));
+
+        if (request.getType() == RequestType.DELETE) {
+            deleteCourse(request.getCourse().getId());
+        }
+
         request.approve();
     }
 
@@ -107,5 +114,14 @@ public class InstructorRequestService {
         if (!course.getInstructorId().equals(instructorId)) {
             throw new MyException(MyErrorCode.INSTRUCTOR_ONLY);
         }
+    }
+
+    private void deleteCourse(Long courseId) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
+
+        course.changeStatus(CourseStatus.CANCELED);
+
+        courseRepository.delete(course);
     }
 }
