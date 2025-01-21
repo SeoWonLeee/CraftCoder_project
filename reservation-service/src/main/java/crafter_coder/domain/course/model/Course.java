@@ -4,11 +4,11 @@ import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.category.CourseCategory;
 import crafter_coder.domain.course.model.category.CourseSubCategory;
 import jakarta.persistence.*;
-import java.time.LocalTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 import static lombok.AccessLevel.PROTECTED;
@@ -65,8 +65,11 @@ public class Course {
         return this.enrollmentCapacity.getCurrentEnrollment() == 0;
     }
 
-    public void updateStatus(String status) {
-        this.status = CourseStatus.valueOf(status.toUpperCase());
+    public void changeStatus(CourseStatus newStatus) {
+        if (!this.status.canChangeTo(newStatus)) {
+            throw new IllegalStateException("현재 상태에서 '" + newStatus.name() + "' 상태로 변경할 수 없습니다.");
+        }
+        this.status = newStatus;
     }
 
     private void setFields(String name, CourseSubCategory courseCategory, CourseDuration courseDuration,
