@@ -10,6 +10,7 @@ import crafter_coder.global.redis.RedisQueueFacade;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -55,10 +56,23 @@ public class CourseService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new EntityNotFoundException("해당 강좌를 찾을 수 없습니다."));
         if (!course.getInstructorId().equals(instructorId)) {
-         //   throw new AccessDeniedException("해당 강좌를 수정할 권한이 없습니다.");
+            throw new AccessDeniedException("해당 강좌를 수정할 권한이 없습니다.");
         }
         course.update(request);
     }
+
+    // 결제 완료
+    public void completePayment(Long courseId, String userId) {
+
+        redisQueueFacade.completePayment(courseId, userId);
+    }
+
+    // 결제 취소
+    public void cancelPayment(Long courseId, String userId) {
+
+        redisQueueFacade.cancelPayment(courseId, userId);
+    }
+
 }
 
 
