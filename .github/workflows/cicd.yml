@@ -1,0 +1,95 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Deploy to EC2 with Docker Compose
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # 1. 소스 코드를 체크아웃
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # 2. JDK 설치
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'corretto'
+
+    # 3.gradle 패키지 캐싱
+    - name: Cache Gradle packages
+      uses: actions/cache@v4.2.0
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+
+    - name: Grant Execute Permission For Gradlew
+      run: chmod +x gradlew
+
+    # 4. application.yml 파일 생성
+    - name: Set up application.yml to reservation-service 
+      env:
+        RESERVATION_APPLICATION_YML: ${{ secrets.RESERVATION_APPLICATION_YML }}
+      run: echo "$RESERVATION_APPLICATION_YML" > ./reservation-service/src/main/resources/application.yml
+
+    - name: Set up application.yml to subscription-service 
+      env:
+        SUBSCRIPTION_APPLICATION_YML: ${{ secrets.SUBSCRIPTION_APPLICATION_YML }}
+      run: echo "$SUBSCRIPTION_APPLICATION_YML" > ./subscription-service/src/main/resources/application.yml
+      
+    # 5. yaml 파일을 EC2로 전송
+    - name: Transfer yaml files to EC2
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ubuntu
+        key: ${{ secrets.EC2_KEY }}
+        source: "docker-compose.yml"
+        target: /home/ubuntu
+
+    # 6. Gradle 빌드
+    - name: Build with Gradle
+      run: ./gradlew build -x test
+
+    # 7. Docker 로그인 (Docker Hub 사용)
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+            
+    # 8. Docker Compose로 이미지 빌드 및 푸시
+    - name: Build and Push Docker Image
+      run: |
+        docker compose -f docker-compose.yml build
+        docker compose -f docker-compose.yml push
+        
+    # 9. SSH로 EC2 연결 및 배포
+    - name: Deploy to EC2 Instance
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        key: ${{secrets.EC2_KEY}}
+        host: ${{secrets.EC2_HOST}}
+        username: ubuntu
+        script: |
+          whoami
+          sudo docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_TOKEN}}
+          sudo docker compose -f docker-compose.yml pull
+          sudo docker compose -f ./docker-compose.yml up -d
+          
