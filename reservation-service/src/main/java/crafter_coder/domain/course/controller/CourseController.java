@@ -81,5 +81,22 @@ public class CourseController {
         // 임시로 true 반환. 실제 환경에서는 사용자 정보를 조회하여 강사 여부 확인
         return true;
     }
+
+    // 결제 완료 API
+    @PostMapping("/{id}/complete-payment")
+    @Operation(summary = "결제 완료", description = "결제를 완료합니다.")
+    public ResponseEntity<?> completePayment(@PathVariable Long id, @RequestParam String userId) {
+        courseService.completePayment(id, userId);
+        return ResponseEntity.ok("결제가 완료되었습니다.");
+    }
+
+
+    // 결제 취소 API
+    @PostMapping("/{id}/cancel-payment")
+    @Operation(summary = "결제 취소", description = "결제를 취소합니다.")
+    public ResponseEntity<?> cancelPayment(@PathVariable Long id, @RequestParam String userId) {
+        courseService.cancelPayment(id, userId);
+        return ResponseEntity.ok("결제가 취소되었습니다.");
+    }
 }
 
