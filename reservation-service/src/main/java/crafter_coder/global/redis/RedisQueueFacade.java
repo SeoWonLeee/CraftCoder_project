@@ -2,6 +2,8 @@ package crafter_coder.global.redis;
 
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.domain.user.model.User;
+import crafter_coder.domain.user.repository.UserRepository;
 import crafter_coder.domain.user_course.model.UserCourse;
 import crafter_coder.domain.user_course.repository.UserCourseRepository;
 import crafter_coder.global.exception.MyErrorCode;
@@ -27,6 +29,7 @@ public class RedisQueueFacade {
     private final RedissonClient redissonClient;
     private final UserCourseRepository userCourseRepository;
     private final CourseRepository courseRepository;
+    private final UserRepository userRepository;
 
 
     private static final String WAITING_QUEUE_KEY = "queue:waiting:";
@@ -39,7 +42,11 @@ public class RedisQueueFacade {
     /**
      * 강좌 신청 로직
      */
+
     public AddQueueResponse addApplyToWaitingQueue(Long courseId, String userId) {
+        /**
+         * ㅇㅇㅇㄹㅇㄹㅁㄴㄹ
+         */
         String waitingQueueKey = WAITING_QUEUE_KEY + courseId; // 대기큐에 들어갈 (강좌 + 사용자) 키
         Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey); // 대기 큐 크기 확인
 
@@ -89,18 +96,20 @@ public class RedisQueueFacade {
 
     private void saveToDatabase(Long courseId, String userId) {
         // RDB 저장 로직 구현
+        User user = userRepository.findById(Long.parseLong(userId))
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
 
         // 2. 중복 확인: 이미 저장된 UserCourse가 있는지 확인
-        boolean exists = userCourseRepository.existsByCourse(course);
+        boolean exists = userCourseRepository.existsByCourseAndUser(course, user);
         if (exists) {
             log.info("UserCourse는 이미 존재합니다.(중복 신청) courseId: {}", userId, courseId);
             return; // 중복된 경우 저장하지 않음
         }
 
         // 3. UserCourse 엔티티 생성
-        UserCourse userCourse = UserCourse.of(null, course);
+        UserCourse userCourse = UserCourse.of(user, course);
         userCourseRepository.save(userCourse);
         log.info("Saved courseId: " + "{}" + ", userId: " + "{}" + " to DB.", courseId, userId);
     }
