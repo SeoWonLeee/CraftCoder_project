@@ -76,4 +76,12 @@ public class AdminCourseController {
             throw new MyException(MyErrorCode.INSTRUCTOR_ONLY);
         }
     }
+
+    @PutMapping("/{courseId}/status")
+    public ResponseEntity<ResponseDto<String>> updateCourseStatus(
+            @PathVariable Long courseId,
+            @RequestBody String status) {
+        courseService.updateCourseStatus(courseId, status);
+        return ResponseEntity.ok(ResponseDto.of(null, "강좌 상태 변경 성공"));
+    }
 }
