@@ -40,7 +40,7 @@ public class Program {
     @OneToMany(mappedBy = "program", fetch = FetchType.LAZY)
     private List<Subscription> subscriptions = new ArrayList<>();
 
-    @Builder
+    @Builder(access = AccessLevel.PRIVATE)
     private Program(String name, BigDecimal price, int billingDate, String accountNumber, ProgramStatus status) {
         this.name = name;
         this.price = price;

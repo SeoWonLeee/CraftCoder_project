@@ -5,12 +5,14 @@ import crafter_coder.domain.program.model.Program;
 import lombok.AccessLevel;
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(access = AccessLevel.PRIVATE)
 public record ProgramResDto(
         Long programId,
         String name,
-        Integer price,
+        BigDecimal price,
         Integer billingDate,
         String accountNumber
 ) {

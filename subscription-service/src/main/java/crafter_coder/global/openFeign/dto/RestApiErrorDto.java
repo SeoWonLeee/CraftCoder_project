@@ -1,4 +1,4 @@
-package crafter_coder.openFeign.dto;
+package crafter_coder.global.openFeign.dto;
 
 public record RestApiErrorDto(
         String url,

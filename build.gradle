@@ -15,7 +15,7 @@ allprojects {
 }
 
 ext {
-	set('springCloudVersion', '2023.0.4')
+	set('springCloudVersion', '2024.0.0')
 }
 
 subprojects { // 각 모듈에 적용할 공통 설정

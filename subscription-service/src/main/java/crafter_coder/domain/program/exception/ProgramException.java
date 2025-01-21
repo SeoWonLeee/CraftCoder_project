@@ -1,26 +1,26 @@
 package crafter_coder.domain.program.exception;
 
+import crafter_coder.global.exception.MyErrorCode;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 public class ProgramException extends RuntimeException {
-    private final ProgramErrorCode errorCode;
+    private final MyErrorCode myErrorCode;
 
-    public ProgramException(ProgramErrorCode errorCode) {
-        super(errorCode.getMessage());
-        this.errorCode = errorCode;
+    public ProgramException(MyErrorCode myErrorCode) {
+        super(myErrorCode.getMessage());
+        this.myErrorCode = myErrorCode;
     }
 
     public static class ProgramAlreadyExistsException extends ProgramException {
         public ProgramAlreadyExistsException() {
-            super(ProgramErrorCode.PROGRAM_ALREADY_EXISTS);
+            super(MyErrorCode.PROGRAM_ALREADY_EXISTS);
         }
     }
 
     public static class ProgramNotFoundException extends ProgramException {
         public ProgramNotFoundException() {
-            super(ProgramErrorCode.PROGRAM_NOT_FOUND);
+            super(MyErrorCode.PROGRAM_NOT_FOUND);
         }
     }
 }

@@ -2,10 +2,10 @@ package crafter_coder.global.scheduler;
 
 import crafter_coder.domain.payment.dto.PaymentReqDto;
 import crafter_coder.domain.program.model.Program;
+import crafter_coder.domain.program.model.ProgramStatus;
 import crafter_coder.domain.program.repository.ProgramRepository;
 import crafter_coder.domain.subscription.model.Subscription;
-import crafter_coder.domain.subscription.repository.SubscriptionRepository;
-import crafter_coder.openFeign.client.PaymentApiClient;
+import crafter_coder.global.openFeign.client.PaymentApiClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -38,15 +38,18 @@ public class PaymentScheduler {
     }
 
     private void processProgramPayments(int dayOfMonth) {
-        List<Program> programs = programRepository.findByBillingDateWithSubscriptions(dayOfMonth);
+        // ACTIVE 상태인 프로그램들 중 결제일이 오늘인 프로그램들을 조회
+        List<Program> programs = programRepository.findByBillingDateAndStatusWithSubscriptions(dayOfMonth, ProgramStatus.ACTIVE);
         for (Program program : programs) {
             String depositAccountNumber = program.getAccountNumber();
             BigDecimal amount = program.getPrice();
-            for (Subscription subscription : program.getSubscriptions()) {
+            // ACTIVE 상태인 구독들에 대해 결제 요청해야 함
+            List<Subscription> subscriptions = program.getSubscriptions().stream().filter(Subscription::isActive).toList();
+            for (Subscription subscription : subscriptions) {
                 String withdrawAccountNumber = subscription.getAccountNumber();
                 String password = subscription.getAccountPassword();
                 paymentApiClient.requestPayment(PaymentReqDto.of(withdrawAccountNumber, depositAccountNumber, amount, password));
-                // TODO: 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경
+                // TODO: 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경(try-catch)
             }
         }
     }

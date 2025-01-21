@@ -4,6 +4,8 @@ import crafter_coder.domain.program.model.Program;
 import crafter_coder.domain.program.model.ProgramStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -33,14 +35,21 @@ public class Subscription {
     @Enumerated(EnumType.STRING)
     private SubscriptionStatus status;
 
-    private Subscription(Program program, String accountNumber, String accountPassword) {
+    @Builder(access = AccessLevel.PRIVATE)
+    private Subscription(Program program, String accountNumber, String accountPassword, SubscriptionStatus status) {
         this.program = program;
         this.accountNumber = accountNumber;
         this.accountPassword = accountPassword;
+        this.status = status;
     }
 
-    public static Subscription of(Program program, String accountNumber, String accountPassword) {
-        return new Subscription(program, accountNumber, accountPassword);
+    public static Subscription of(Program program, String accountNumber, String accountPassword, SubscriptionStatus status) {
+        return Subscription.builder()
+                .program(program)
+                .accountNumber(accountNumber)
+                .accountPassword(accountPassword)
+                .status(status)
+                .build();
     }
 
     public void softDelete() {
@@ -49,5 +58,9 @@ public class Subscription {
 
     public void updateStatus(SubscriptionStatus status) {
         this.status = status;
+    }
+
+    public boolean isActive() {
+        return this.status == SubscriptionStatus.ACTIVE;
     }
 }

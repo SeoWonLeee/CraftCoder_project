@@ -1,6 +1,6 @@
-package crafter_coder.openFeign.config;
+package crafter_coder.global.openFeign.config;
 
-import crafter_coder.openFeign.error.FeignErrorDecoder;
+import crafter_coder.global.openFeign.error.FeignErrorDecoder;
 import feign.codec.ErrorDecoder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -1,7 +1,7 @@
-package crafter_coder.openFeign.error;
+package crafter_coder.global.openFeign.error;
 
-import crafter_coder.openFeign.exception.RestApiException.RestApiClientException;
-import crafter_coder.openFeign.exception.RestApiException.RestApiServerException;
+import crafter_coder.global.openFeign.exception.RestApiException.RestApiClientException;
+import crafter_coder.global.openFeign.exception.RestApiException.RestApiServerException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;

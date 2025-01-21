@@ -23,9 +23,15 @@ public class SubscriptionService {
 
     @Transactional
     public SubscriptionResDto subscribe(SubscriptionReqDto subscriptionReqDto) {
+        // TODO: 계좌번호와 비밀번호 해당하는 계좌가 존재하는지, 이미 구독중인 지(계좌번호가 동일한게 등록되어 있는지) 체크 필요
         Long programId = subscriptionReqDto.programId();
         Program foundProgram = findProgramById(programId);
-        Subscription subscription = Subscription.of(foundProgram, subscriptionReqDto.accountNumber(), subscriptionReqDto.accountPassword());
+        Subscription subscription = Subscription.of(
+                foundProgram,
+                subscriptionReqDto.accountNumber(),
+                subscriptionReqDto.accountPassword(),
+                SubscriptionStatus.ACTIVE);
+
         subscriptionRepository.save(subscription);
 
         return SubscriptionResDto.of(subscription.getId());
@@ -36,6 +42,7 @@ public class SubscriptionService {
                 .orElseThrow(ProgramException.ProgramNotFoundException::new);
     }
 
+    @Transactional
     public SubscriptionResDto unsubscribe(Long subscriptionId) {
         Subscription subscription = findSubscriptionById(subscriptionId);
         subscription.softDelete();
