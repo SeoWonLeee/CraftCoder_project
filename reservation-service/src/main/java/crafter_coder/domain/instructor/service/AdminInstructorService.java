@@ -1,6 +1,7 @@
 package crafter_coder.domain.instructor.service;
 
 import crafter_coder.domain.course.model.Course;
+import crafter_coder.domain.course.model.CourseStatus;
 import crafter_coder.domain.course.repository.CourseRepository;
 import crafter_coder.domain.instructor.dto.CourseUpdateRequestDto;
 import crafter_coder.domain.instructor.dto.InstructorResponseDto;
@@ -75,9 +76,16 @@ public class AdminInstructorService {
         validateInstructor(instructorId);
 
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
 
-        course.updateStatus(status);
+        CourseStatus newStatus;
+        try {
+            newStatus = CourseStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new MyException(MyErrorCode.INVALID_STATUS);
+        }
+
+        course.changeStatus(newStatus);
     }
 
     private void validateInstructor(Long instructorId) {

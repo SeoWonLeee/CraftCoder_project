@@ -22,7 +22,9 @@ public enum MyErrorCode {
     INVALID_REQUEST_DATA(HttpStatus.BAD_REQUEST, "요청 데이터가 잘못되었습니다."),
     CANNOT_UPDATE_COURSE(HttpStatus.BAD_REQUEST, "강좌 상태를 변경할 수 없습니다."),
     CANNOT_DELETE_COURSE(HttpStatus.BAD_REQUEST, "강좌 삭제 요청을 처리할 수 없습니다."),
-    REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID로 조회된 강사 요청을 찾을 수 없습니다.");
+    REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID로 조회된 강사 요청을 찾을 수 없습니다."),
+
+    INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "잘못된 카테고리입니다.");
 
 
     private final HttpStatus status;

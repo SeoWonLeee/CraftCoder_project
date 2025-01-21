@@ -1,5 +1,6 @@
 package crafter_coder.domain.user.service;
 
+import crafter_coder.domain.user.dto.UserCourseReservationDto;
 import crafter_coder.domain.user.dto.UserRecordResponseDto;
 import crafter_coder.domain.user.dto.UserReservationDto;
 import crafter_coder.domain.user.dto.UserResponseDto;
@@ -50,16 +51,16 @@ public class UserAdminService {
 
     private List<UserReservationDto> fetchUserReservations(Long userId) {
         return userCourseRepository.findByUserId(userId).stream()
-                .map(this::mapToReservationDto)
+                .map(this::mapToUserReservationDto)
                 .collect(Collectors.toList());
     }
 
-    private UserReservationDto mapToReservationDto(UserCourse userCourse) {
+    private UserReservationDto mapToUserReservationDto(UserCourse userCourse) {
         return UserReservationDto.builder()
                 .courseId(userCourse.getCourse().getId())
                 .courseName(userCourse.getCourse().getName())
                 .status(userCourse.getEnrollmentStatus().name())
-                .paymentStatus("DONE") // 결제 상태 연동 필요
+                .paymentStatus(fetchPaymentStatus(userCourse))
                 .reservationDate(userCourse.getPaymentDeadline())
                 .dayOfWeek(userCourse.getCourse().getCourseSchedule().getDayOfWeek())
                 .startTime(userCourse.getCourse().getCourseSchedule().getStartTime().toString())
@@ -68,6 +69,33 @@ public class UserAdminService {
                 .instructorName(fetchInstructorName(userCourse.getCourse().getInstructorId()))
                 .startDate(userCourse.getCourse().getCourseDuration().getStartDate())
                 .endDate(userCourse.getCourse().getCourseDuration().getEndDate())
+                .build();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserCourseReservationDto> getUserCourseReservations(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
+
+        List<UserCourse> userCourses = userCourseRepository.findByUserId(userId);
+
+        return userCourses.stream()
+                .map(this::mapToUserCourseReservationDto)
+                .collect(Collectors.toList());
+    }
+
+    private UserCourseReservationDto mapToUserCourseReservationDto(UserCourse userCourse) {
+        return UserCourseReservationDto.builder()
+                .courseId(userCourse.getCourse().getId())
+                .courseName(userCourse.getCourse().getName())
+                .status(userCourse.getEnrollmentStatus().name())
+                .paymentStatus(fetchPaymentStatus(userCourse))
+                .startDate(userCourse.getCourse().getCourseDuration().getStartDate())
+                .endDate(userCourse.getCourse().getCourseDuration().getEndDate())
+                .dayOfWeek(userCourse.getCourse().getCourseSchedule().getDayOfWeek())
+                .startTime(userCourse.getCourse().getCourseSchedule().getStartTime().toString())
+                .endTime(userCourse.getCourse().getCourseSchedule().getEndTime().toString())
+                .instructorName(fetchInstructorName(userCourse.getCourse().getInstructorId()))
                 .build();
     }
 
@@ -84,5 +112,10 @@ public class UserAdminService {
             throw new MyException(MyErrorCode.USER_NOT_FOUND);
         }
         return instructor.getName();
+    }
+
+    private String fetchPaymentStatus(UserCourse userCourse) {
+        // 결제 상태 조회 로직을 여기에 추가
+        return "DONE"; // 임시 하드코딩, 실제 결제 상태 연동 필요
     }
 }

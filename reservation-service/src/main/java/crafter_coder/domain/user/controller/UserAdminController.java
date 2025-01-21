@@ -1,5 +1,6 @@
 package crafter_coder.domain.user.controller;
 
+import crafter_coder.domain.user.dto.UserCourseReservationDto;
 import crafter_coder.domain.user.dto.UserRecordResponseDto;
 import crafter_coder.domain.user.dto.UserResponseDto;
 import crafter_coder.domain.user.service.UserAdminService;
@@ -40,4 +41,11 @@ public class UserAdminController {
         userAdminService.updateUserStatus(id, status);
         return ResponseEntity.ok(ResponseDto.of(null, "회원 상태 변경 성공"));
     }
+
+    @GetMapping("/{id}/courses")
+    public ResponseEntity<ResponseDto<List<UserCourseReservationDto>>> getUserCourseReservations(@PathVariable Long id) {
+        List<UserCourseReservationDto> reservations = userAdminService.getUserCourseReservations(id);
+        return ResponseEntity.ok(ResponseDto.of(reservations, "회원 강좌 예약 현황 조회 성공"));
+    }
+
 }

@@ -32,7 +32,8 @@ public class UserService {
                 registerRequestDto.getAccountId(),
                 registerRequestDto.getAccountPassword(),
                 registerRequestDto.getRole(),
-                registerRequestDto.getStatus()
+                registerRequestDto.getStatus(),
+                registerRequestDto.getSpecialization()
         );
 
         userRepository.save(user);
