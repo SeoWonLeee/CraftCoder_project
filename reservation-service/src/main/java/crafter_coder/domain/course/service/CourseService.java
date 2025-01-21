@@ -8,6 +8,10 @@ import crafter_coder.domain.course.model.CourseStatus;
 import crafter_coder.domain.course.model.category.CourseCategory;
 import crafter_coder.domain.course.model.category.CourseSubCategory;
 import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.domain.notification.NotificationDto;
+import crafter_coder.domain.notification.NotificationType;
+import crafter_coder.domain.notification.event.NotificationEvent;
+import crafter_coder.domain.notification.event.NotificationEventPublisher;
 import crafter_coder.domain.user.dto.UserResponseDto;
 import crafter_coder.domain.user_course.model.UserCourse;
 import crafter_coder.global.exception.MyErrorCode;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 public class CourseService {
 
     private final CourseRepository courseRepository;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     public List<CourseListResponse> getAllCourses() {
         List<Course> courses = courseRepository.findAll();
@@ -43,6 +48,10 @@ public class CourseService {
     public Long createCourse(CourseRequest request, Long instructorId) {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
+
+        String content = course.getName() + " 강좌가 개설되었습니다.";
+        // 특정 사용자가 아닌 전체 사용자에게 알림을 보낼 것이므로 receiverId를 null로 설정
+        notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.COURSE_OPEN, null)));
         return course.getId();
     }
 
