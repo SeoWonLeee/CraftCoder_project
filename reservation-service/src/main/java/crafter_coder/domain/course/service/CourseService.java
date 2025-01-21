@@ -4,6 +4,7 @@ import crafter_coder.domain.course.dto.CourseDetailResponse;
 import crafter_coder.domain.course.dto.CourseListResponse;
 import crafter_coder.domain.course.dto.CourseRequest;
 import crafter_coder.domain.course.model.Course;
+import crafter_coder.domain.course.model.CourseStatus;
 import crafter_coder.domain.course.model.category.CourseCategory;
 import crafter_coder.domain.course.model.category.CourseSubCategory;
 import crafter_coder.domain.course.repository.CourseRepository;
@@ -105,5 +106,21 @@ public class CourseService {
         return userCourses.stream()
                 .map(userCourse -> UserResponseDto.of(userCourse.getUser()))
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateCourseStatus(Long courseId, String status) {
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
+
+        CourseStatus newStatus;
+        try {
+            newStatus = CourseStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new MyException(MyErrorCode.INVALID_STATUS);
+        }
+
+        course.changeStatus(newStatus);
+        courseRepository.save(course);
     }
 }
