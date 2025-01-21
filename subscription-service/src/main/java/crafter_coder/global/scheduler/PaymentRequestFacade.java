@@ -28,6 +28,7 @@ public class PaymentRequestFacade {
     private final ProgramRepository programRepository;
     private final PaymentApiClient paymentApiClient;
     private final PaymentRepository paymentRepository;
+    private final AesUtil aesUtil;
 
     @Transactional
     public void processProgramPayments(int dayOfMonth) {
@@ -44,21 +45,22 @@ public class PaymentRequestFacade {
                 String password = subscription.getAccountPassword();
 
                 // request body를 암호화해서 결제 요청
-                AesUtil aes = AesUtil.getInstance();
                 try {
                     PaymentResDto response = paymentApiClient.requestPayment(
                             PaymentReqDto.of(
-                                    aes.encryptData(withdrawAccountNumber),
-                                    aes.encryptData(depositAccountNumber),
+                                    aesUtil.encryptData(withdrawAccountNumber),
+                                    aesUtil.encryptData(depositAccountNumber),
                                     amount,
-                                    aes.encryptData(password)
+                                    aesUtil.encryptData(password)
                             ));
 
                     Payment payment = Payment.of(response.paymentId(), amount, PaymentStatus.DONE, subscription);
                     paymentRepository.save(payment);
                 } catch (RestApiException e) { // 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경
-                    if (e.getMessage().contains("잔액 부족")) {
-                        log.info("잔액 부족으로 결제 실패, 구독 상태를 INACTIVE로 변경합니다. subscriptionId={}", subscription.getId());
+                    log.error("결제 실패, subscriptionId={}", subscription.getId());
+                    String pattern = ".*(잔액 부족|존재하지 않는 계좌|인증 실패).*";
+                    if (e.getMessage().matches(pattern)) {
+                        log.info("구독 상태를 INACTIVE로 변경합니다. subscriptionId={}", subscription.getId());
                         subscription.updateStatus(SubscriptionStatus.INACTIVE);
                     }
                 }

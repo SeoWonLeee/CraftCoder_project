@@ -2,6 +2,7 @@ package crafter_coder.global.util;
 
 import crafter_coder.global.exception.AesEncryptException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -12,19 +13,11 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.*;
 import java.util.Base64;
 
-// 싱글톤으로 관리
+@Component
 public class AesUtil {
-    private static final AesUtil INSTANCE = new AesUtil();
 
     @Value("${aes.secret-key}")
     private String SECRET_KEY;
-
-    private AesUtil() {
-    }
-
-    public static AesUtil getInstance() {
-        return INSTANCE;
-    }
 
     public String encrypt(String plainText) throws GeneralSecurityException {
         // Generate random IV
