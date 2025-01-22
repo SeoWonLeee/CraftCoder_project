@@ -263,14 +263,15 @@ public class RedisQueueFacade {
         // Redis에서 대기 큐 키 생성
         String waitingQueueKey = WAITING_QUEUE_KEY + courseId;
 
-        // 대기 큐의 현재 크기를 확인
-        Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey);
-        if (queueSize == null || queueSize >= MAX_WAITING_QUEUE_SIZE) {
-            throw new MyException(MyErrorCode.QUEUE_FULL); // 대기 큐가 가득 찬 경우 예외 발생
-        }
-
-        // 동시성 문제를 방지하기 위해 분산 락을 사용
+        // 락 안에서 대기 큐 사이즈 확인 및 사용자 추가 처리
         executeWithLock("lock:course:" + courseId, () -> {
+            Long queueSize = redisTemplate.opsForZSet().size(waitingQueueKey);
+            if (queueSize == null) queueSize = 0L;
+
+            if (queueSize >= MAX_WAITING_QUEUE_SIZE) {
+                throw new MyException(MyErrorCode.QUEUE_FULL); // 대기 큐가 가득 찬 경우 예외 발생
+            }
+
             long timestamp = System.currentTimeMillis();
             redisTemplate.opsForZSet().add(waitingQueueKey, userId, timestamp); // 대기 큐에 사용자 추가
             redisTemplate.opsForSet().add(COURSE_IDS_SET, String.valueOf(courseId)); // 강좌 ID를 관리용 Set에 추가
