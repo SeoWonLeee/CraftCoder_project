@@ -19,7 +19,6 @@ public class RegisterRequestDto {
     private String password;
     private String name;
     private String phoneNumber;
-    private String email;
     private LocalDate birthDate;
     private String bank;
     private String accountId;

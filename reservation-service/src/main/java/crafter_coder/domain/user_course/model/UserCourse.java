@@ -35,4 +35,23 @@ public class UserCourse {
     @Column(name = "payment_deadline", nullable = false)
     private LocalDate paymentDeadline;
 
+    private UserCourse(User user, Course course, EnrollmentStatus enrollmentStatus, LocalDate paymentDeadline) {
+        this.user = user;
+        this.course = course;
+        this.enrollmentStatus = enrollmentStatus;
+        this.paymentDeadline = paymentDeadline;
+    }
+
+    public static UserCourse of(User user, Course course) {
+        LocalDate enrollmentDeadline = course.getEnrollmentDeadline();
+        return new UserCourse(user, course, EnrollmentStatus.APPLICATED, enrollmentDeadline);
+    }
+
+    // 상태 업데이트 메서드 추가
+    public void updateStatus(EnrollmentStatus newStatus) {
+        if (this.enrollmentStatus == newStatus) {
+            throw new IllegalStateException("이미 해당 상태입니다.");
+        }
+        this.enrollmentStatus = newStatus;
+    }
 }
