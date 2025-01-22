@@ -1,12 +1,21 @@
+networks:
+  goorm_network:
+    driver: bridge
+
 services:
   reservation-service:
     build:
       context: ./reservation-service
     image:
       ksah3756/craftcoder-reservation-service:latest
+    depends_on:
+      - mysql
+      - redis
     container_name: reservation-service
     ports:
       - 8080:8080
+    networks:
+      - goorm_network
 
   subscription-service:
     build:
@@ -16,15 +25,28 @@ services:
     container_name: subscription-service
     ports:
       - 8081:8081
+    networks:
+      - goorm_network
 
   mysql:
     image: mysql:8.0.26
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
     container_name: mysql
     ports:
       - 3306:3306
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - goorm_network
 
   redis:
     image: redis:latest
     container_name: redis
     ports:
       - 6379:6379
+    networks:
+      - goorm_network
+
+volumes:
+  mysql_data:
