@@ -16,7 +16,6 @@ import java.time.LocalDate;
 public class UpdateProfileRequestDto {
     private String name;
     private String phoneNumber;
-    private String email;
     private LocalDate birthDate;
     private String accountId;
     private String accountPassword;
