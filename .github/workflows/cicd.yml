@@ -100,6 +100,6 @@ jobs:
         script: |
           whoami
           sudo docker login -u ${{secrets.DOCKERHUB_USERNAME}} -p ${{secrets.DOCKERHUB_TOKEN}}
-          sudo docker compose -f docker-compose.yml pull
-          sudo docker compose -f ./docker-compose.yml up -d
+          sudo docker-compose -f docker-compose.yml pull
+          sudo docker-compose -f ./docker-compose.yml up -d
           
