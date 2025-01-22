@@ -36,6 +36,10 @@ public class EmitterRepository {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
+    public Map<String, SseEmitter> getAllEmitters() {
+        return emitters;
+    }
+
     public Map<String, Object> findAllEventCacheByUserId(String userId) {
         return eventCache.entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(userId))
@@ -61,5 +65,18 @@ public class EmitterRepository {
         eventIds.forEach(eventCache::remove);
     }
 
+    public String makeTimeIncludeId(Long id) {
+        return id + "_" + System.currentTimeMillis();
+    }
+
+    public Long extractUserId(String combinedId) {
+        int underscoreIndex = combinedId.indexOf('_');
+        if (underscoreIndex != -1) {
+            return Long.valueOf(combinedId.substring(0, underscoreIndex));
+        } else {
+            // 언더스코어가 없을 경우 전체 문자열 반환 또는 예외 처리
+            return Long.valueOf(combinedId);
+        }
+    }
 
 }

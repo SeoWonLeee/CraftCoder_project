@@ -7,15 +7,14 @@ import org.springframework.http.HttpStatus;
 @Getter
 @RequiredArgsConstructor
 public enum MyErrorCode {
-    // 아래는 예시이니 필요하다면 변경 혹은 삭제해도 괜찮습니다.
-    // User
-     USER_NOT_FOUND(HttpStatus.NOT_FOUND,"존재하지 않는 유저입니다."),
+    // 구독 관련 에러코드
+    SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
 
-    //Image
-    NOT_GENERATE_FIRE_AI_IMAGE(HttpStatus.BAD_REQUEST,"횃불이 이미지가 생성 중 입니다.");
-
+    // 프로그램 관련 에러코드
+    PROGRAM_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "프로그램 이름이 이미 존재합니다."),
+    PROGRAM_NOT_FOUND(HttpStatus.NOT_FOUND, "프로그램을 찾을 수 없습니다."),
+    ;
 
     private final HttpStatus status;
     private final String message;
 }
-

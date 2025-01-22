@@ -1,6 +1,7 @@
 package crafter_coder.domain.notification.controller;
 
 import crafter_coder.domain.notification.service.NotificationService;
+import crafter_coder.domain.notification.util.IdTimestampUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -12,13 +13,14 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequestMapping("/api/v1/notifications")
 public class NotificationController {
     private final NotificationService notificationService;
+    private final IdTimestampUtil idTimestampUtil;
 
     @GetMapping(value = "/subscribe", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> subscribe(
             @RequestParam Long userId,
             @RequestHeader(value = "Last-Event-ID", required = false, defaultValue = "") String lastEventId
     ) {
-        String emitterId = notificationService.makeTimeIncludeId(userId);
+        String emitterId = idTimestampUtil.makeTimeIncludeId(userId);
         return ResponseEntity.ok(notificationService.subscribe(emitterId, lastEventId));
     }
 }

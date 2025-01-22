@@ -1,0 +1,12 @@
+aes:
+  secret-key: dtj8WL8jwm49LhXyXnscpXTv5uc5VhWm+WWN5pkDejo=
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+aes:
+  secret-key: dtj8WL8jwm49LhXyXnscpXTv5uc5VhWm+WWN5pkDejo=

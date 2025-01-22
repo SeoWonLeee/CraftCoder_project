@@ -5,6 +5,7 @@ import crafter_coder.domain.notification.NotificationType;
 import crafter_coder.domain.notification.emitter.EmitterRepository;
 import crafter_coder.domain.notification.exception.NotificationException;
 import crafter_coder.domain.notification.exception.NotificationException.NotificationSendException;
+import crafter_coder.domain.notification.util.IdTimestampUtil;
 import crafter_coder.domain.user.model.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class NotificationService {
     private final EmitterRepository emitterRepository;
+    private final IdTimestampUtil idTimestampUtil;
     private final Long timeoutMillis = 600_000L;
 
     public SseEmitter subscribe(String emitterId, String lastEventId) {
@@ -26,14 +28,14 @@ public class NotificationService {
 
         emitterRepository.save(emitterId, emitter);
 
-        Long userId = extractUserId(emitterId);
+        Long userId = idTimestampUtil.extractUserId(emitterId);
         handleInitialNotification(emitterId, lastEventId, emitter, userId);
 
         return emitter;
     }
 
     public void send(String eventId, NotificationType notificationType, String content) {
-        Long userId = extractUserId(eventId);
+        Long userId = idTimestampUtil.extractUserId(eventId);
         NotificationDto notification = NotificationDto.of(content, notificationType, userId);
         Map<String, SseEmitter> emitters = emitterRepository.findAllEmittersByUserId(userId.toString());
         emitters.forEach(
@@ -81,20 +83,6 @@ public class NotificationService {
 
         if (hasLostData(lastEventId)) {
             sendLostData(lastEventId, userId, emitterId, emitter);
-        }
-    }
-
-    public String makeTimeIncludeId(Long id) {
-        return id + "_" + System.currentTimeMillis();
-    }
-
-    private Long extractUserId(String combinedId) {
-        int underscoreIndex = combinedId.indexOf('_');
-        if (underscoreIndex != -1) {
-            return Long.valueOf(combinedId.substring(0, underscoreIndex));
-        } else {
-            // 언더스코어가 없을 경우 전체 문자열 반환 또는 예외 처리
-            return Long.valueOf(combinedId);
         }
     }
 }
