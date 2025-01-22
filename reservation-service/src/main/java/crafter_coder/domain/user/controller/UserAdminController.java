@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/admin/users")
@@ -42,9 +44,12 @@ public class UserAdminController {
 
     @PutMapping("/{id}/status")
     @Operation(summary = "회원 상태 변경", description = "회원 상태를 변경합니다.")
-    public ResponseEntity<ResponseDto<String>> updateUserStatus(@PathVariable Long id, @RequestBody String status) {
-        userAdminService.updateUserStatus(id, status);
-        return ResponseEntity.ok(ResponseDto.of(null, "회원 상태 변경 성공"));
+    public ResponseEntity<ResponseDto<Map<String, String>>> updateUserStatus(@PathVariable Long id, @RequestBody String status) {
+        String oldStatus = userAdminService.updateUserStatus(id, status);
+        Map<String, String> result = new HashMap<>();
+        result.put("oldStatus", oldStatus);
+        result.put("newStatus", status.toUpperCase());
+        return ResponseEntity.ok(ResponseDto.of(result, "회원 상태 변경 성공"));
     }
 
     @GetMapping("/{id}/courses")
