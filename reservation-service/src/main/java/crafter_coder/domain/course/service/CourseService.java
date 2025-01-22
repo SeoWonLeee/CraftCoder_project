@@ -7,6 +7,15 @@ import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
 import crafter_coder.global.redis.AddQueueResponse;
 import crafter_coder.global.redis.RedisQueueFacade;
+import crafter_coder.domain.notification.NotificationDto;
+import crafter_coder.domain.notification.NotificationType;
+import crafter_coder.domain.notification.event.NotificationEvent;
+import crafter_coder.domain.notification.event.NotificationEventPublisher;
+import crafter_coder.domain.user.dto.UserResponseDto;
+import crafter_coder.domain.user_course.model.UserCourse;
+import crafter_coder.global.exception.MyErrorCode;
+import crafter_coder.global.exception.MyException;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.access.AccessDeniedException;
@@ -23,6 +32,7 @@ public class CourseService {
 
     private final CourseRepository courseRepository;
     private final RedisQueueFacade redisQueueFacade;
+    private final NotificationEventPublisher notificationEventPublisher;
 
     //강좌 신청하기
     public AddQueueResponse applyCourse(Long courseId, String userId) {
@@ -48,6 +58,10 @@ public class CourseService {
     public Long createCourse(CourseRequest request, Long instructorId) {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
+
+        String content = course.getName() + " 강좌가 개설되었습니다.";
+        // 특정 사용자가 아닌 전체 사용자에게 알림을 보낼 것이므로 receiverId를 null로 설정
+        notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.COURSE_OPEN, null)));
         return course.getId();
     }
 
@@ -72,9 +86,13 @@ public class CourseService {
 
         redisQueueFacade.cancelPayment(courseId, userId);
     }
+  
+  
+    // dev에 있던 내용 (필요없다면 삭제하기)
+    course.changeStatus(newStatus);
+    courseRepository.save(course);
 
 }
-
 
 
 
