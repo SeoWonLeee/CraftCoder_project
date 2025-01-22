@@ -26,7 +26,7 @@ public class SwaggerConfig {
     }
     private Info apiInfo() {
         return new Info()
-                .title("INTIP API명세서")
+                .title("정기 결제 프로그램 구독 서비스 명세서")
                 .description("api 명세서")
                 .version("1.0.0");
     }

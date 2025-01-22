@@ -34,8 +34,7 @@ public class NotificationService {
         return emitter;
     }
 
-    public void send(String eventId, NotificationType notificationType, String content) {
-        Long userId = idTimestampUtil.extractUserId(eventId);
+    public void send(Long userId, String eventId, NotificationType notificationType, String content) {
         NotificationDto notification = NotificationDto.of(content, notificationType, userId);
         Map<String, SseEmitter> emitters = emitterRepository.findAllEmittersByUserId(userId.toString());
         emitters.forEach(

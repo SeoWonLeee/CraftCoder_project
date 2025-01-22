@@ -49,7 +49,7 @@ public class CourseService {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
 
-        String content = course.getName() + " 강좌가 개설되었습니다.";
+        String content = NotificationType.COURSE_OPEN.getContent().replace("{courseName}", course.getName());
         // 특정 사용자가 아닌 전체 사용자에게 알림을 보낼 것이므로 receiverId를 null로 설정
         notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.COURSE_OPEN, null)));
         return course.getId();
