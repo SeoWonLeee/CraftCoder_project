@@ -107,7 +107,7 @@ public class UserAdminService {
     }
 
     private String fetchInstructorName(Long instructorId) {
-        User instructor = userRepository.findByIdAndRole(instructorId, Role.INSTRUCTIOR);
+        User instructor = userRepository.findByIdAndRole(instructorId, Role.INSTRUCTOR);
         if (instructor == null) {
             throw new MyException(MyErrorCode.USER_NOT_FOUND);
         }

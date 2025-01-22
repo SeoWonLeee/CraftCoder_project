@@ -27,7 +27,7 @@ public class AdminInstructorService {
     @Transactional(readOnly = true)
     public List<InstructorResponseDto> getAllInstructors() {
         return userRepository.findAll().stream()
-                .filter(user -> user.getRole() == Role.INSTRUCTIOR)
+                .filter(user -> user.getRole() == Role.INSTRUCTOR)
                 .map(InstructorResponseDto::of)
                 .collect(Collectors.toList());
     }
@@ -35,7 +35,7 @@ public class AdminInstructorService {
     @Transactional(readOnly = true)
     public InstructorResponseDto getInstructorById(Long id) {
         User instructor = userRepository.findById(id)
-                .filter(user -> user.getRole() == Role.INSTRUCTIOR)
+                .filter(user -> user.getRole() == Role.INSTRUCTOR)
                 .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
         return InstructorResponseDto.of(instructor);
     }
@@ -92,7 +92,7 @@ public class AdminInstructorService {
         User instructor = userRepository.findById(instructorId)
                 .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
 
-        if (instructor.getRole() != Role.INSTRUCTIOR) {
+        if (instructor.getRole() != Role.INSTRUCTOR) {
             throw new MyException(MyErrorCode.USER_NOT_FOUND);
         }
     }
