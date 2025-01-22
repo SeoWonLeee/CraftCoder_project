@@ -89,8 +89,8 @@ public class CourseService {
   
   
     // dev에 있던 내용 (필요없다면 삭제하기)
-    course.changeStatus(newStatus);
-    courseRepository.save(course);
+//    course.changeStatus(newStatus);
+//    courseRepository.save(course);
 
 }
 
