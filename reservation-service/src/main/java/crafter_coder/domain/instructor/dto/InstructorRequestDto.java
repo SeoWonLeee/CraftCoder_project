@@ -10,10 +10,6 @@ import java.time.LocalDate;
 @Builder
 public class InstructorRequestDto {
 
-    private Long requestId;
-    private String type;
-    private Long courseId;
-    private String courseName;
     private String status;
     private String dayOfWeek;
     private String startTime;
@@ -22,14 +18,9 @@ public class InstructorRequestDto {
     private LocalDate startDate;
     private LocalDate endDate;
     private String reason;
-    private LocalDate requestedAt;
 
     public static InstructorRequestDto of(InstructorRequest request) {
-        return builder()
-                .requestId(request.getId())
-                .type(request.getType().name())
-                .courseId(request.getCourse().getId())
-                .courseName(request.getCourse().getName())
+        return InstructorRequestDto.builder()
                 .status(request.getStatus())
                 .dayOfWeek(request.getDayOfWeek())
                 .startTime(request.getStartTime())
@@ -38,7 +29,6 @@ public class InstructorRequestDto {
                 .startDate(request.getStartDate())
                 .endDate(request.getEndDate())
                 .reason(request.getReason())
-                .requestedAt(request.getRequestedAt())
                 .build();
     }
 }
