@@ -50,17 +50,17 @@ public class AdminCourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(ResponseDto.of(courseId, "강좌 생성"));
     }
 
-    @PutMapping("/{courseId}")
-    @Operation(summary = "강좌 수정", description = "강좌 ID로 기존 강좌를 수정합니다.")
-    public ResponseEntity<ResponseDto<Void>> updateCourse(
-            @PathVariable Long courseId,
-            @RequestBody CourseRequest courseRequest,
-            @RequestParam Long instructorId
-    ) {
-        validateInstructorRole(instructorId);
-        courseService.updateCourse(courseId, courseRequest, instructorId);
-        return ResponseEntity.ok(ResponseDto.of(null, "강좌 수정"));
-    }
+//    @PutMapping("/{courseId}")
+//    @Operation(summary = "강좌 수정", description = "강좌 ID로 기존 강좌를 수정합니다.")
+//    public ResponseEntity<ResponseDto<Void>> updateCourse(
+//            @PathVariable Long courseId,
+//            @RequestBody CourseRequest courseRequest,
+//            @RequestParam Long instructorId
+//    ) {
+//        validateInstructorRole(instructorId);
+//        courseService.updateCourse(courseId, courseRequest, instructorId);
+//        return ResponseEntity.ok(ResponseDto.of(null, "강좌 수정"));
+//    }
 
     @GetMapping("/categories/{category}")
     @Operation(summary = "카테고리별 강좌 목록 조회", description = "카테고리별 강좌 목록을 조회합니다.")
@@ -77,14 +77,14 @@ public class AdminCourseController {
         return ResponseEntity.ok(ResponseDto.of(users, "강좌 수강 회원 목록 조회"));
     }
 
-    @PutMapping("/{courseId}/status")
-    @Operation(summary = "강좌 상태 변경", description = "강좌의 상태를 변경합니다.")
-    public ResponseEntity<ResponseDto<String>> updateCourseStatus(
-            @PathVariable Long courseId,
-            @RequestBody String status) {
-        courseService.updateCourseStatus(courseId, status);
-        return ResponseEntity.ok(ResponseDto.of(null, "강좌 상태 변경 성공"));
-    }
+//    @PutMapping("/{courseId}/status")
+//    @Operation(summary = "강좌 상태 변경", description = "강좌의 상태를 변경합니다.")
+//    public ResponseEntity<ResponseDto<String>> updateCourseStatus(
+//            @PathVariable Long courseId,
+//            @RequestBody String status) {
+//        courseService.updateCourseStatus(courseId, status);
+//        return ResponseEntity.ok(ResponseDto.of(null, "강좌 상태 변경 성공"));
+//    }
 
     // 강사 권한 확인
     private void validateInstructorRole(Long instructorId) {
