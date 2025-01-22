@@ -17,4 +17,7 @@ public interface UserCourseRepository extends JpaRepository<UserCourse, Long> {
 
     // 특정 강좌와 사용자에 대한 UserCourse 가져오기 (상태 업데이트 등에서 사용)
     Optional<UserCourse> findByCourseAndUser(Course course, User user);
+
+    // ksah3756: 강좌 정원 미달로 폐강 시 해당 강좌를 수강한 사용자들 조회해서 알림을 보내야 하기 때문에 추가
+    List<UserCourse> findByCourseId(Long courseId);
 }
