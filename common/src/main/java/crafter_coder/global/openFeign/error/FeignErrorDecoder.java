@@ -1,7 +1,7 @@
 package crafter_coder.global.openFeign.error;
 
-import crafter_coder.global.openFeign.exception.RestApiException.RestApiClientException;
-import crafter_coder.global.openFeign.exception.RestApiException.RestApiServerException;
+import crafter_coder.global.exception.RestApiException.RestApiClientException;
+import crafter_coder.global.exception.RestApiException.RestApiServerException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
 import lombok.extern.slf4j.Slf4j;
@@ -23,6 +23,7 @@ public class FeignErrorDecoder implements ErrorDecoder {
         log.error("FeignException 발생 : url={}, status={}, responseBody={}", requestUrl, responseStatus, responseBody);
 
         if(responseStatus.is5xxServerError()) {
+            // TODO: 네트워크 에러 같이 재시도가 필요한 경우 RetryableException을 던지도록 수정
             return new RestApiServerException(responseStatus, requestUrl, responseBody);
         } else if(responseStatus.is4xxClientError()) {
             return new RestApiClientException(responseStatus, requestUrl, responseBody);

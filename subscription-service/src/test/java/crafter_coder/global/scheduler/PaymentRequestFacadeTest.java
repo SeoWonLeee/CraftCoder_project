@@ -1,7 +1,5 @@
 package crafter_coder.global.scheduler;
 
-import crafter_coder.domain.payment.dto.PaymentReqDto;
-import crafter_coder.domain.payment.dto.PaymentResDto;
 import crafter_coder.domain.payment.model.Payment;
 import crafter_coder.domain.payment.repository.PaymentRepository;
 import crafter_coder.domain.program.model.Program;
@@ -10,15 +8,9 @@ import crafter_coder.domain.program.repository.ProgramRepository;
 import crafter_coder.domain.subscription.model.Subscription;
 import crafter_coder.domain.subscription.model.SubscriptionStatus;
 import crafter_coder.domain.subscription.repository.SubscriptionRepository;
-import crafter_coder.global.openFeign.client.PaymentApiClient;
-import crafter_coder.global.openFeign.exception.RestApiException;
-import org.assertj.core.api.Assertions;
+import crafter_coder.global.exception.RestApiException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -28,11 +20,10 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class PaymentRequestFacadeIntegrationTest {
+class PaymentRequestFacadeTest {
 
     @Autowired
     private PaymentRequestFacade paymentRequestFacade;

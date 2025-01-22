@@ -1,21 +1,11 @@
 package crafter_coder.global.scheduler;
 
-import crafter_coder.domain.payment.dto.PaymentReqDto;
-import crafter_coder.domain.program.model.Program;
-import crafter_coder.domain.program.model.ProgramStatus;
-import crafter_coder.domain.program.repository.ProgramRepository;
-import crafter_coder.domain.subscription.model.Subscription;
-import crafter_coder.global.openFeign.client.PaymentApiClient;
-import crafter_coder.global.util.AesUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.Clock;
 import java.time.LocalDate;
-import java.util.List;
 
 @Slf4j
 @Component

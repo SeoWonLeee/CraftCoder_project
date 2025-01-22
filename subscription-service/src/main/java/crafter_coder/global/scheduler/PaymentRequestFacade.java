@@ -1,7 +1,7 @@
 package crafter_coder.global.scheduler;
 
-import crafter_coder.domain.payment.dto.PaymentReqDto;
-import crafter_coder.domain.payment.dto.PaymentResDto;
+import crafter_coder.global.openFeign.dto.PaymentReqDto;
+import crafter_coder.global.openFeign.dto.PaymentResDto;
 import crafter_coder.domain.payment.model.Payment;
 import crafter_coder.domain.payment.model.PaymentStatus;
 import crafter_coder.domain.payment.repository.PaymentRepository;
@@ -11,8 +11,8 @@ import crafter_coder.domain.program.repository.ProgramRepository;
 import crafter_coder.domain.subscription.model.Subscription;
 import crafter_coder.domain.subscription.model.SubscriptionStatus;
 import crafter_coder.global.openFeign.client.PaymentApiClient;
-import crafter_coder.global.openFeign.exception.RestApiException;
-import crafter_coder.global.util.AesUtil;
+import crafter_coder.global.exception.RestApiException;
+import crafter_coder.global.aes.AesUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

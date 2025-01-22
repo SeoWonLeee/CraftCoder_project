@@ -3,7 +3,7 @@ package crafter_coder.global.exception;
 import crafter_coder.domain.program.exception.ProgramException;
 import crafter_coder.domain.subscription.exception.SubscriptionException;
 import crafter_coder.global.dto.ResponseDto;
-import crafter_coder.global.openFeign.exception.RestApiException;
+import feign.RetryableException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -80,6 +80,14 @@ public class GlobalExceptionHandler {
         String message = "요청한 JSON 데이터를 읽을 수 없습니다: " + ex.getMessage();
         ResponseDto<String> response = ResponseDto.error(message);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler(RetryableException.class)
+    public ResponseEntity<ResponseDto<String>> handleRetryableException(RetryableException ex){
+        String message = "FeignClient에서 재시도가 필요한 에러가 발생했습니다(ex.네트워크 오류): " + ex.getMessage();
+        log.error("RetryableException 발생 msg:{}",message);
+        ResponseDto<String> response = ResponseDto.error(message);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
 }
 

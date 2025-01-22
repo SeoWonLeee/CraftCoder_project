@@ -1,4 +1,4 @@
-package crafter_coder.global.util;
+package crafter_coder.global.aes;
 
 import crafter_coder.global.exception.AesEncryptException;
 import org.springframework.beans.factory.annotation.Value;

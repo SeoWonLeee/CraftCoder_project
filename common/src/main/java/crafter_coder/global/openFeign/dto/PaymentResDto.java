@@ -1,4 +1,4 @@
-package crafter_coder.domain.payment.dto;
+package crafter_coder.global.openFeign.dto;
 
 public record PaymentResDto(
         Long paymentId
