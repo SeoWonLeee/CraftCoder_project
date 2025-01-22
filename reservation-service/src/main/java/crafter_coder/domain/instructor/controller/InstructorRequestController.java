@@ -1,5 +1,7 @@
 package crafter_coder.domain.instructor.controller;
 
+import crafter_coder.domain.course.dto.CourseDetailResponse;
+import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.instructor.dto.InstructorRequestDto;
 import crafter_coder.domain.instructor.service.InstructorRequestService;
 import crafter_coder.global.dto.ResponseDto;
@@ -19,15 +21,17 @@ public class InstructorRequestController {
 
     @PostMapping("/courses/{courseId}/update")
     @Operation(summary = "강좌 수정 요청 (서버)", description = "관리자에게 강좌 수정을 요청했습니다.")
-    public ResponseEntity<ResponseDto<String>> createUpdateRequest(
+    public ResponseEntity<ResponseDto<CourseDetailResponse>> createUpdateRequest(
             @PathVariable Long instructorId,
             @PathVariable Long courseId,
             @RequestBody InstructorRequestDto requestDto) {
-        requestService.createUpdateRequest(
+        Course updatedCourse = requestService.createUpdateRequest(
                 instructorId, courseId, requestDto.getStatus(), requestDto.getDayOfWeek(),
                 requestDto.getStartTime(), requestDto.getEndTime(), requestDto.getMaxCapacity(),
                 requestDto.getStartDate(), requestDto.getEndDate());
-        return ResponseEntity.ok(ResponseDto.of(null, "강좌 수정 요청 (서버)"));
+
+        CourseDetailResponse response = CourseDetailResponse.fromEntity(updatedCourse);
+        return ResponseEntity.ok(ResponseDto.of(response, "강좌 수정 요청 (서버)"));
     }
 
     @PostMapping("/courses/{courseId}/delete")
