@@ -31,7 +31,7 @@ services:
   mysql:
     image: mysql:8.0.26
     environment:
-      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_ROOT_PASSWORD: 1234 # 어짜피 ec2 3306 포트로 접속못하니까 괜찮지 않을까..ㅎㅎ
     container_name: mysql
     ports:
       - 3306:3306

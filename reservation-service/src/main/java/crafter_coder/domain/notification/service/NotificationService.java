@@ -19,7 +19,7 @@ import java.util.Map;
 public class NotificationService {
     private final EmitterRepository emitterRepository;
     private final IdTimestampUtil idTimestampUtil;
-    private final Long timeoutMillis = 600_000L;
+    private final Long timeoutMillis = 600_000L; // 10분
 
     public SseEmitter subscribe(String emitterId, String lastEventId) {
         // makeTimeIncludeId가 현재 시간에 의존하기 때문에 순수 함수가 될수 없고 테스트하기 어렵게 만듦, 시간 관련 id를 인자로 주입받도록 변경
