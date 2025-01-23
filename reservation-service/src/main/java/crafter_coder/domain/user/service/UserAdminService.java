@@ -100,14 +100,16 @@ public class UserAdminService {
     }
 
     @Transactional
-    public void updateUserStatus(Long id, String status) {
+    public String updateUserStatus(Long id, String status) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
+        String oldStatus = user.getStatus().name();
         user.updateStatus(ActiveStatus.valueOf(status.toUpperCase()));
+        return oldStatus;
     }
 
     private String fetchInstructorName(Long instructorId) {
-        User instructor = userRepository.findByIdAndRole(instructorId, Role.INSTRUCTIOR);
+        User instructor = userRepository.findByIdAndRole(instructorId, Role.INSTRUCTOR);
         if (instructor == null) {
             throw new MyException(MyErrorCode.USER_NOT_FOUND);
         }

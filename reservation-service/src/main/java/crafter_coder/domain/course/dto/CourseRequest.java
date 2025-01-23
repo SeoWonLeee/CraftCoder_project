@@ -31,9 +31,16 @@ public class CourseRequest {
     private String enrollmentDeadline;
 
     public Course toEntity(Long instructorId) {
+        CourseSubCategory subCategory;
+        try {
+            subCategory = CourseSubCategory.valueOf(courseCategory.toUpperCase()); // 대소문자 무시 처리
+        } catch (IllegalArgumentException | NullPointerException e) {
+            throw new IllegalArgumentException("강좌 카테고리가 잘못되었습니다.: " + courseCategory, e);
+        }
+
         return Course.create(
                 name,
-                CourseSubCategory.valueOf(courseCategory),
+                subCategory,
                 CourseDuration.of(LocalDate.parse(startDate), LocalDate.parse(endDate)),
                 CourseSchedule.of(dayOfWeek, LocalTime.parse(startTime), LocalTime.parse(endTime)),
                 instructorId,
@@ -43,5 +50,6 @@ public class CourseRequest {
                 LocalDate.parse(enrollmentDeadline)
         );
     }
+
 }
 

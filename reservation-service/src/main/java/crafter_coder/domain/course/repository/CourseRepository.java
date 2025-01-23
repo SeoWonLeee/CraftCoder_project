@@ -13,7 +13,7 @@ public interface CourseRepository extends JpaRepository<Course, Long> {
     @Query("SELECT c FROM Course c WHERE c.courseCategory IN :subCategories")
     List<Course> findBySubCategories(@Param("subCategories") List<String> subCategories);
 
-    @Query("SELECT c FROM Course c WHERE c.courseCategory = :category")
+    @Query("SELECT c FROM Course c WHERE LOWER(c.courseCategory) = LOWER(:category)")
     List<Course> findByCategory(@Param("category") String category);
 
     @Query("SELECT uc FROM UserCourse uc WHERE uc.course.id = :courseId")

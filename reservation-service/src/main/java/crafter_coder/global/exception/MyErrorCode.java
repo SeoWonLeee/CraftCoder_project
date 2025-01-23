@@ -24,6 +24,8 @@ public enum MyErrorCode {
     CANNOT_DELETE_COURSE(HttpStatus.BAD_REQUEST, "강좌 삭제 요청을 처리할 수 없습니다."),
     REQUEST_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 ID로 조회된 강사 요청을 찾을 수 없습니다."),
 
+    INVALID_CATEGORY(HttpStatus.BAD_REQUEST, "잘못된 카테고리입니다."),
+
     // Queue
     QUEUE_SYSTEM_BUSY(HttpStatus.SERVICE_UNAVAILABLE, "시스템이 바쁩니다. 잠시 후 다시 시도해주세요."),
     QUEUE_FULL(HttpStatus.SERVICE_UNAVAILABLE, "해당 강좌의 대기열이 가득 찼습니다. 나중에 다시 시도해주세요."),

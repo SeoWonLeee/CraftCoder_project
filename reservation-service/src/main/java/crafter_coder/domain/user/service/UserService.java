@@ -5,6 +5,7 @@ import crafter_coder.domain.user.dto.RegisterRequestDto;
 import crafter_coder.domain.user.dto.UserResponseDto;
 import crafter_coder.domain.user.mapper.UserMapper;
 import crafter_coder.domain.user.model.User;
+import crafter_coder.domain.user.model.Role;
 import crafter_coder.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,7 +55,6 @@ public class UserService {
         }
     }
 
-
     private User findUserByUsernameOrThrow(LoginRequestDto loginRequestDto) {
         return userRepository.findByUsername(loginRequestDto.getUsername())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid username or password."));
@@ -64,5 +64,10 @@ public class UserService {
         if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("Invalid password.");
         }
+    }
+
+    public boolean isInstructor(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+        return user.getRole() == Role.INSTRUCTOR;
     }
 }

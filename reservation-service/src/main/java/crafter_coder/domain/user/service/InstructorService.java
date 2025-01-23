@@ -16,13 +16,13 @@ public class InstructorService {
 
     public boolean isValidInstructor(Long instructorId) {
         return userRepository.findById(instructorId)
-                .filter(user -> user.getRole() == Role.INSTRUCTIOR)
+                .filter(user -> user.getRole() == Role.INSTRUCTOR)
                 .isPresent();
     }
 
     public User getInstructor(Long instructorId) {
         return userRepository.findById(instructorId)
-                .filter(user -> user.getRole() == Role.INSTRUCTIOR)
+                .filter(user -> user.getRole() == Role.INSTRUCTOR)
                 .orElseThrow(() -> new MyException(MyErrorCode.INSTRUCTOR_ONLY));
     }
 }
