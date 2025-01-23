@@ -27,13 +27,13 @@ public class SwaggerConfig {
     }
     private Info apiInfo() {
         return new Info()
-                .title("INTIP API명세서")
+                .title("문화 센터 예약 서비스 명세서")
                 .description("api 명세서")
                 .version("1.0.0");
     }
     private List<Server> servers() {
         List<Server> servers = new ArrayList<>();
-        servers.add(new Server().url("http://localhost:8080").description("Local URL"));
+        servers.add(new Server().url("/").description("Server URL"));
         //servers.add(new Server().url(serverHost).description("Dev Server URL"));
         return servers;
     }

@@ -64,7 +64,7 @@ public class CourseService {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
 
-        String content = course.getName() + " 강좌가 개설되었습니다.";
+        String content = NotificationType.COURSE_OPEN.getContent().replace("{courseName}", course.getName());
         notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.COURSE_OPEN, null)));
         return course.getId();
     }

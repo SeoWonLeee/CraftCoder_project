@@ -7,12 +7,14 @@ import crafter_coder.domain.notification.event.NotificationEvent;
 import crafter_coder.domain.notification.util.IdTimestampUtil;
 import crafter_coder.domain.user_course.repository.UserCourseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import static crafter_coder.domain.notification.NotificationType.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class NotificationSender {
 
     private final NotificationService notificationService;
@@ -29,6 +31,7 @@ public class NotificationSender {
                 Long userId = idTimestampUtil.extractUserId(key);
                 sendNotificationToTargetUser(userId, notificationType, notificationDto);
             });
+            log.info("모든 사용자에게 COURSE_OPEN 알림 전송");
         } else if(notificationType.equals(COURSE_CANCELLATION)) { // COURSE_CANCELLATION은 해당 강좌를 수강했던 사용자에게 알림
             // userCourse에서 해당 강좌를 수강한 사용자들을 조회하여 알림 전송 (NotifictionDto.receiverId()는 courseId)
             Long courseId = notificationDto.receiverId();
@@ -36,8 +39,10 @@ public class NotificationSender {
                 Long userId = userCourse.getUser().getId();
                 sendNotificationToTargetUser(userId, notificationType, notificationDto);
             });
+            log.info("해당 강좌를 수강한 사용자에게 COURSE_CANCELLATION 알림 전송");
         } else if(notificationType.equals(AVAILABLE_SEAT)) { // COURSE_UPDATE은 대기열 첫 순번 사용자에게 알림
             sendNotificationToTargetUser(notificationDto.receiverId(), notificationType, notificationDto);
+            log.info("대기열 첫 순번 사용자에게 AVAILABLE_SEAT 알림 전송");
         }
     }
 
