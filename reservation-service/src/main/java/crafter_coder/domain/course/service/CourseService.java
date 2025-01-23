@@ -16,9 +16,9 @@ import crafter_coder.domain.user.dto.UserResponseDto;
 import crafter_coder.domain.user_course.model.UserCourse;
 import crafter_coder.global.exception.MyErrorCode;
 import crafter_coder.global.exception.MyException;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 //import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.AccessDeniedException;
@@ -64,7 +64,7 @@ public class CourseService {
         Course course = request.toEntity(instructorId);
         courseRepository.save(course);
 
-        String content = course.getName() + " 강좌가 개설되었습니다.";
+        String content = NotificationType.COURSE_OPEN.getContent().replace("{courseName}", course.getName());
         notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.COURSE_OPEN, null)));
         return course.getId();
     }

@@ -3,6 +3,8 @@ package crafter_coder.domain.instructor.service;
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.model.CourseStatus;
 import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.domain.instructor.dto.CourseStatusComparisonDto;
+import crafter_coder.domain.instructor.dto.CourseUpdateComparisonDto;
 import crafter_coder.domain.instructor.dto.CourseUpdateRequestDto;
 import crafter_coder.domain.instructor.dto.InstructorResponseDto;
 import crafter_coder.domain.user.model.Role;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,23 +44,6 @@ public class AdminInstructorService {
     }
 
     @Transactional
-    public void updateCourse(Long instructorId, Long courseId, CourseUpdateRequestDto request) {
-        validateInstructor(instructorId);
-
-        Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new MyException(MyErrorCode.USER_NOT_FOUND));
-
-        course.updateCourseDetails(
-                request.getName(),
-                request.getDayOfWeek(),
-                request.getStartTime(),
-                request.getEndTime(),
-                request.getPlace(),
-                request.getMaxCapacity()
-        );
-    }
-
-    @Transactional
     public void deleteCourse(Long instructorId, Long courseId) {
         validateInstructor(instructorId);
 
@@ -72,11 +58,12 @@ public class AdminInstructorService {
     }
 
     @Transactional
-    public void updateCourseStatus(Long instructorId, Long courseId, String status) {
+    public CourseStatusComparisonDto updateCourseStatus(Long instructorId, Long courseId, String status) {
         validateInstructor(instructorId);
 
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
+        CourseStatus oldStatus = course.getStatus();
 
         CourseStatus newStatus;
         try {
@@ -86,6 +73,11 @@ public class AdminInstructorService {
         }
 
         course.changeStatus(newStatus);
+
+        return CourseStatusComparisonDto.builder()
+                .oldStatus(oldStatus.name())
+                .newStatus(newStatus.name())
+                .build();
     }
 
     private void validateInstructor(Long instructorId) {
@@ -95,5 +87,44 @@ public class AdminInstructorService {
         if (instructor.getRole() != Role.INSTRUCTOR) {
             throw new MyException(MyErrorCode.USER_NOT_FOUND);
         }
+    }
+
+    @Transactional
+    public CourseUpdateComparisonDto updateCourse(Long instructorId, Long courseId, CourseUpdateRequestDto request) {
+        validateInstructor(instructorId);
+
+        Course originalCourse = courseRepository.findById(courseId)
+                .orElseThrow(() -> new MyException(MyErrorCode.COURSE_NOT_FOUND));
+        Map<String, Object> oldData = Map.of(
+                "name", originalCourse.getName(),
+                "dayOfWeek", originalCourse.getCourseSchedule().getDayOfWeek(),
+                "startTime", originalCourse.getCourseSchedule().getStartTime().toString(),
+                "endTime", originalCourse.getCourseSchedule().getEndTime().toString(),
+                "place", originalCourse.getPlace(),
+                "maxCapacity", originalCourse.getEnrollmentCapacity().getMaxCapacity()
+        );
+
+        originalCourse.updateCourseDetails(
+                request.getName(),
+                request.getDayOfWeek(),
+                request.getStartTime(),
+                request.getEndTime(),
+                request.getPlace(),
+                request.getMaxCapacity()
+        );
+
+        Map<String, Object> newData = Map.of(
+                "name", originalCourse.getName(),
+                "dayOfWeek", originalCourse.getCourseSchedule().getDayOfWeek(),
+                "startTime", originalCourse.getCourseSchedule().getStartTime().toString(),
+                "endTime", originalCourse.getCourseSchedule().getEndTime().toString(),
+                "place", originalCourse.getPlace(),
+                "maxCapacity", originalCourse.getEnrollmentCapacity().getMaxCapacity()
+        );
+
+        return CourseUpdateComparisonDto.builder()
+                .oldData(oldData)
+                .newData(newData)
+                .build();
     }
 }

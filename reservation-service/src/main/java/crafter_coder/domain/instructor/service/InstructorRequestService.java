@@ -29,8 +29,9 @@ public class InstructorRequestService {
     private final CourseRepository courseRepository;
 
     @Transactional
-    public void createUpdateRequest(Long instructorId, Long courseId, String status, String dayOfWeek, String startTime,
-                                    String endTime, Integer maxCapacity, LocalDate startDate, LocalDate endDate) {
+    public Course createUpdateRequest(Long instructorId, Long courseId, String status, String dayOfWeek,
+                                      String startTime, String endTime, Integer maxCapacity,
+                                      LocalDate startDate, LocalDate endDate) {
         User instructor = validateInstructor(instructorId);
         validateCourseOwnership(instructorId, courseId);
 
@@ -39,6 +40,8 @@ public class InstructorRequestService {
         InstructorRequest request = InstructorRequest.createUpdateRequest(
                 instructor, course, status, dayOfWeek, startTime, endTime, maxCapacity, startDate, endDate);
         requestRepository.save(request);
+
+        return course;
     }
 
     @Transactional

@@ -201,6 +201,10 @@ package crafter_coder.global.redis;
 
 import crafter_coder.domain.course.model.Course;
 import crafter_coder.domain.course.repository.CourseRepository;
+import crafter_coder.domain.notification.NotificationDto;
+import crafter_coder.domain.notification.NotificationType;
+import crafter_coder.domain.notification.event.NotificationEvent;
+import crafter_coder.domain.notification.event.NotificationEventPublisher;
 import crafter_coder.domain.user.model.User;
 import crafter_coder.domain.user.repository.UserRepository;
 import crafter_coder.domain.user_course.model.EnrollmentStatus;
@@ -241,6 +245,9 @@ public class RedisQueueFacade {
     private final UserCourseRepository userCourseRepository;
     private final CourseRepository courseRepository;
     private final UserRepository userRepository;
+
+    // 알림 전송을 위한 이벤트 발행
+    private final NotificationEventPublisher notificationEventPublisher;
 
     // Redis 키와 관련된 상수 정의
     private static final String WAITING_QUEUE_KEY = "queue:waiting:"; // 대기 큐의 Redis 키 Prefix
@@ -366,6 +373,12 @@ public class RedisQueueFacade {
                 redisTemplate.opsForZSet().add(activeQueueKey, userId, System.currentTimeMillis());
                 redisTemplate.opsForZSet().remove(waitingQueueKey, userId);
                 log.info("대기 큐 -> 활성 큐 이동 - courseId: {}, userId: {}", courseId, userId);
+
+                // 해당 유저에게 알림 전송
+                String courseName =  courseRepository.findById(courseId).get().getName();
+                String content = NotificationType.AVAILABLE_SEAT.getContent().replace("{courseName}", courseName);
+                notificationEventPublisher.publish(NotificationEvent.of(this, NotificationDto.of(content, NotificationType.AVAILABLE_SEAT, Long.valueOf(userId))));
+                log.info("대기 큐 -> 활성 큐 이동 알림 전송 - courseId: {}, userId: {}", courseId, userId);
             }
         }
     }

@@ -46,6 +46,7 @@ public class PaymentRequestFacade {
 
                 // request body를 암호화해서 결제 요청
                 try {
+                    log.info("결제 요청, subscriptionId={}", subscription.getId());
                     PaymentResDto response = paymentApiClient.requestPayment(
                             PaymentReqDto.of(
                                     aesUtil.encryptData(withdrawAccountNumber),
@@ -58,11 +59,11 @@ public class PaymentRequestFacade {
                     paymentRepository.save(payment);
                 } catch (RestApiException e) { // 잔액 부족으로 결제 실패 시 해당 계좌 구독 상태 INACTIVE로 변경
                     log.error("결제 실패, subscriptionId={}", subscription.getId());
-                    String pattern = ".*(잔액 부족|존재하지 않는 계좌|인증 실패).*";
-                    if (e.getMessage().matches(pattern)) {
-                        log.info("구독 상태를 INACTIVE로 변경합니다. subscriptionId={}", subscription.getId());
-                        subscription.updateStatus(SubscriptionStatus.INACTIVE);
-                    }
+//                    String pattern = ".*(잔액 부족|존재하지 않는 계좌|인증 실패).*";
+//                    if (e.getMessage().matches(pattern)) {
+//                        log.info("구독 상태를 INACTIVE로 변경합니다. subscriptionId={}", subscription.getId());
+//                        subscription.updateStatus(SubscriptionStatus.INACTIVE);
+//                    }
                 }
             }
         }
