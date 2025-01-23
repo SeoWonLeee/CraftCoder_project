@@ -35,7 +35,7 @@ public enum MyErrorCode {
     USER_NOT_IN_COURSE(HttpStatus.NOT_FOUND, "해당 강좌에 사용자가 존재하지 않습니다."),
     USER_ALREADY_ENROLLED(HttpStatus.BAD_REQUEST, "사용자가 이미 해당 강좌에 등록되어 있습니다."),
     PAYMENT_ALREADY_COMPLETED(HttpStatus.BAD_REQUEST, "이미 결제가 완료된 사용자입니다."),
-    PAYMENT_CANCELLED(HttpStatus.BAD_REQUEST, "결제가 이미 취소되었습니다.");
+    PAYMENT_CANCELLED(HttpStatus.BAD_REQUEST, "결제가 이미 취소되었습니다."),
   
     // 구독 관련 에러코드
     SUBSCRIPTION_NOT_FOUND(HttpStatus.NOT_FOUND, "구독 정보를 찾을 수 없습니다."),
