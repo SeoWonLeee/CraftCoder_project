@@ -54,7 +54,7 @@
 <br/>  
 
 ## 데이터 참고
-- **강좌 대기열 흐름 데이터**  
+- **ERD**  
   <img width="1570" height="666" alt="Image" src="https://github.com/user-attachments/assets/764b7e55-299f-43ad-bf8d-3e7b5d02a6a3" />
 
 <br/>  
